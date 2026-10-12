@@ -1083,26 +1083,42 @@ function newFind() {
 }
 $('#findSay').addEventListener('click', sayFind);
 
+/* Слова для игр: существительные, глаголы, прилагательные из раздела «Слова».
+   Без слов с немой первой буквой (know, knock, write): на слух они начинаются с другой буквы. */
+const SILENT_START = new Set(['know', 'knock', 'write']);
+const GAME_WORDS = ['noun', 'verb', 'adj'].flatMap(c => VOCAB[c]).filter(w => !SILENT_START.has(w.word));
+const BY_LETTER = {};
+GAME_WORDS.forEach(w => { const L = w.word[0].toUpperCase(); (BY_LETTER[L] = BY_LETTER[L] || []).push(w); });
+const GAME_LETTERS = LET.filter(l => BY_LETTER[l.L]);
+const firstHl = w => '<b>' + esc(w[0]) + '</b>' + esc(w.slice(1));
+
 /* game 2: who starts with */
 let pickT = null, pickLock = false;
 function sayPick() { if (pickT) tell([RU('Кто начинается на букву'), EN(pickT.name + '?', { pitch: 1.3 })], [EN(`Who starts with ${pickT.name}?`)]); }
 function newPick() {
   pickLock = false;
-  const pool = LET.filter(l => l.items.some(i => i.starts));
-  let t; do { t = rand(pool); } while (pickT && t === pickT);
+  let t; do { t = rand(GAME_LETTERS); } while (pickT && t === pickT);
   pickT = t;
   const tgt = $('#pickTarget'); tgt.textContent = t.L; tgt.style.setProperty('--c', t.color);
-  const right = rand(t.items.filter(i => i.starts));
-  const wrong = sample(PICS.filter(p => p.word[0].toUpperCase() !== t.L), 2);
+  const right = rand(BY_LETTER[t.L]);
+  /* Неверные варианты: другая буква и картинка, которую нельзя прочитать как слово на нужную букву
+     (🐘 не даём к букве B — это и elephant, и big). Картинки в одном раунде не повторяются. */
+  const taken = new Set(BY_LETTER[t.L].map(w => w.emo));
+  const wrong = [];
+  for (const w of shuffle(GAME_WORDS)) {
+    if (wrong.length === 2) break;
+    if (w.word[0].toUpperCase() === t.L || taken.has(w.emo)) continue;
+    wrong.push(w); taken.add(w.emo);
+  }
   const box = $('#pickChoices'); box.innerHTML = '';
   shuffle([right, ...wrong]).forEach(p => {
     const b = document.createElement('button'); b.className = 'pic';
-    b.innerHTML = `<span class="emo" aria-hidden="true">${p.emo}</span><span class="w">${p.word}</span><span class="ru">${p.ru}</span>`;
+    b.innerHTML = `<span class="emo" aria-hidden="true">${p.emo}</span><span class="w">${esc(p.word)}</span><span class="ru">${esc(p.ru)}</span>`;
     b.addEventListener('click', () => {
       if (pickLock) return;
       if (p === right) {
         pickLock = true; replay(b, 'right'); sfx.yay(); addStar(b);
-        b.querySelector('.w').innerHTML = hl(p.word, t.L); b.style.setProperty('--c', t.color);
+        b.querySelector('.w').innerHTML = firstHl(p.word); b.style.setProperty('--c', t.color);
         tell([RU(rand(PRAISE), { pitch: 1.3 }), EN(p.say + '!'), PAUSE(150), RU(p.ru)], [EN('Yes!', { pitch: 1.35 }), EN(p.say + '!'), PAUSE(300), EN(`${t.name} is for ${p.say}!`)]);
         box.querySelectorAll('.pic').forEach(x => { if (x !== b) x.classList.add('faded'); });
         setTimeout(() => { if (cur === 'pick') newPick(); }, 2300);
@@ -1124,7 +1140,7 @@ const area = $('#bubbleArea');
 function spawn() {
   if (bubbles.length >= 6) return;
   const w = area.clientWidth, h = area.clientHeight; if (!w || !h) return;
-  const l = rand(LET), s = Math.round(Math.min(130, Math.max(84, w * 0.26)));
+  const l = rand(GAME_LETTERS), s = Math.round(Math.min(130, Math.max(84, w * 0.26)));
   const el = document.createElement('button');
   el.className = 'bubble'; el.textContent = l.L;
   el.style.setProperty('--s', s + 'px'); el.style.setProperty('--c', l.color);
@@ -1143,9 +1159,10 @@ function loop(t) {
 function popBubble(b) {
   if (!bubbles.includes(b)) return;
   bubbles = bubbles.filter(x => x !== b);
-  sfx.pop(); say(EN(b.l.name + '!', { pitch: 1.3, gap: 120 }), EN(b.l.items[0].say + '!'));
+  const w = rand(BY_LETTER[b.l.L]);
+  sfx.pop(); say(EN(b.l.name + '!', { pitch: 1.3, gap: 120 }), EN(w.say + '!'));
   const r = b.el.getBoundingClientRect(), ar = area.getBoundingClientRect();
-  const f = document.createElement('span'); f.className = 'float'; f.textContent = b.l.items[0].emo;
+  const f = document.createElement('span'); f.className = 'float'; f.textContent = w.emo;
   f.style.left = (r.left - ar.left + r.width / 2 - 28) + 'px'; f.style.top = (r.top - ar.top + r.height / 2 - 28) + 'px';
   area.appendChild(f);
   const an = f.animate([{ transform: 'scale(.3)', opacity: 1 }, { transform: 'translateY(-90px) scale(1.3)', opacity: 0 }], { duration: reduced ? 600 : 1300, easing: 'ease-out' });

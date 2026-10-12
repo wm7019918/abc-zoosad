@@ -1,5 +1,5 @@
 // Офлайн-кэш «ABC Зоосад». При изменении файлов увеличьте номер версии.
-const VERSION = 'abc-zoosad-v4';
+const VERSION = 'abc-zoosad-v5';
 const SHELL = [
   './',
   './index.html',
