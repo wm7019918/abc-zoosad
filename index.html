@@ -134,14 +134,51 @@ main{flex:1;min-height:0;display:flex;flex-direction:column}
 .meadow{position:fixed;left:0;right:0;bottom:0;z-index:0;height:calc(var(--meadow) + env(safe-area-inset-bottom,0px));background:var(--grass);pointer-events:none}
 .meadow svg{position:absolute;left:0;bottom:100%;width:100%;height:26px;display:block}
 
+/* Word cards */
+#words{align-items:center;gap:10px;padding-bottom:4px}
+.chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.chip{border:0;border-radius:999px;padding:10px 16px;font-weight:900;font-size:16px;background:var(--card);color:var(--ink);box-shadow:0 3px 0 rgba(38,48,67,.12)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--on-color)}
+.wcard{flex:1;min-height:0;width:100%;max-width:480px;background:var(--card);border-radius:34px;box-shadow:0 8px 0 rgba(38,48,67,.12);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:14px 16px;text-align:center;overflow:hidden}
+.wcard.flip{animation:cardin .35s ease-out}
+.wemo{border:0;background:none;padding:0;font-size:clamp(90px,28vmin,170px);line-height:1.12}
+.wemo.say{animation:wiggle .6s}
+.wword{font-family:var(--font-letter);font-weight:600;font-size:clamp(40px,12vw,62px);line-height:1.05;color:var(--ink);overflow-wrap:anywhere}
+.wword b{color:var(--c);font-weight:700}
+.wsyl{font-family:var(--font-letter);font-weight:500;font-size:22px;color:var(--ink-soft);letter-spacing:.03em}
+.wsyl i{font-style:normal;color:var(--c);padding-inline:.12em}
+.wtr{margin-top:6px;font-weight:900;font-size:26px;color:var(--ink)}
+.wtr small{display:block;font-size:12px;font-weight:800;color:var(--ink-soft);letter-spacing:.06em;text-transform:uppercase}
+.wipa{font-size:15px;font-weight:700;color:var(--ink-soft);font-family:"Charis SIL","Doulos SIL","Lucida Sans Unicode","Arial Unicode MS",var(--font-ui)}
+.wru{margin-top:4px;font-weight:900;font-size:21px;color:var(--c)}
+.wbtns{display:flex;align-items:center;gap:8px;width:100%;max-width:480px}
+.wbtns .arrow{width:60px;height:60px;flex:none}
+.sbtn{flex:1;min-width:0;height:66px;border-radius:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-weight:900;font-size:15px;line-height:1.1}
+.sbtn .si{font-size:24px;line-height:1}
+#wSay{--c:var(--sun);color:var(--ink)}
+#wSlow{--c:var(--green)}
+.pic .tr{font-size:15px;font-weight:900;color:var(--ink)}
+.seg-row{display:flex;flex-direction:column;gap:8px;color:var(--ink);font-weight:800;font-size:15px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:#DCE3EE;border-radius:14px;padding:4px}
+.seg button{border:0;border-radius:11px;background:transparent;padding:9px 4px;font-weight:900;font-size:14px;line-height:1.15;color:var(--ink-soft)}
+.seg button[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 2px 4px rgba(38,48,67,.15)}
+.mode.wide{grid-column:1/-1;min-height:104px;flex-direction:row;gap:14px}
+.mode.wide .txt{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+
+@keyframes cardin{from{transform:translateX(var(--dir,24px));opacity:.2}to{transform:none;opacity:1}}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
 @keyframes bump{0%{transform:scale(1)}35%{transform:scale(1.14)}65%{transform:scale(.96)}100%{transform:scale(1)}}
 @keyframes wobble{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px) rotate(-4deg)}40%{transform:translateX(9px) rotate(3deg)}60%{transform:translateX(-6px)}80%{transform:translateX(4px)}}
 @keyframes wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-10deg) scale(1.08)}75%{transform:rotate(9deg) scale(1.08)}}
 
 @media (orientation:landscape) and (max-height:520px){
-  .modes{grid-template-columns:repeat(4,1fr)}
+  .modes{grid-template-columns:repeat(5,1fr)}
   .mode{min-height:120px}
+  .mode.wide{grid-column:auto;flex-direction:column;gap:6px}
+  .mode.wide .txt{align-items:center}
+  #words{flex-direction:row;flex-wrap:wrap;justify-content:center}
+  .wcard{flex:1 1 60%}
+  .wbtns{flex:1 1 30%;flex-wrap:wrap}
   .hero{padding-top:30px}
   .choice{aspect-ratio:auto;height:46vh}
   #card{flex-direction:row;flex-wrap:wrap}
@@ -172,12 +209,20 @@ main{flex:1;min-height:0;display:flex;flex-direction:column}
       </div>
       <div class="modes">
         <button class="toy mode" style="--c:var(--orange)" data-go="abc"><span class="ico">🔤</span><span class="lbl">Алфавит</span><span class="en">ABC</span></button>
+        <button class="toy mode" style="--c:var(--pink)" data-go="words"><span class="ico">📖</span><span class="lbl">Слова</span><span class="en">Words</span></button>
         <button class="toy mode" style="--c:var(--purple)" data-go="find"><span class="ico">🔎</span><span class="lbl">Найди букву</span><span class="en">Find the letter</span></button>
         <button class="toy mode" style="--c:var(--green)" data-go="pick"><span class="ico">🦒</span><span class="lbl">Кто на букву?</span><span class="en">Who starts with…</span></button>
-        <button class="toy mode" style="--c:var(--blue)" data-go="bubbles"><span class="ico">🫧</span><span class="lbl">Пузырьки</span><span class="en">Pop the letters</span></button>
+        <button class="toy mode wide" style="--c:var(--blue)" data-go="bubbles"><span class="ico">🫧</span><span class="txt"><span class="lbl">Пузырьки</span><span class="en">Pop the letters</span></span></button>
       </div>
       <div class="parents">
-        <div><b>Для родителей.</b> Включите звук: на iPhone боковой переключатель «Без звука» должен быть выключен. Задания и похвала звучат по-русски, а буквы и слова — по-английски, с переводом. За правильные ответы малыш получает звёздочки, ошибки не наказываются.</div>
+        <div><b>Для родителей.</b> Включите звук: на iPhone боковой переключатель «Без звука» должен быть выключен. Задания и похвала звучат по-русски, а буквы и слова — по-английски, с переводом. В разделе «Слова» есть транскрипция, чтобы вам было проще повторять вместе с малышом. За правильные ответы малыш получает звёздочки, ошибки не наказываются.</div>
+        <div class="seg-row"><span>Скорость речи</span>
+          <div class="seg" role="group" aria-label="Скорость речи">
+            <button data-speed="slower" aria-pressed="false">Очень медленно</button>
+            <button data-speed="slow" aria-pressed="true">Медленно</button>
+            <button data-speed="normal" aria-pressed="false">Обычно</button>
+          </div>
+        </div>
         <div class="switch"><span>Задания голосом на русском</span><button id="ruVoiceToggle" aria-pressed="true" aria-label="Задания голосом на русском"></button></div>
         <div class="switch"><span>Показывать перевод на русский</span><button id="ruToggle" aria-pressed="true" aria-label="Перевод на русский"></button></div>
       </div>
@@ -194,6 +239,29 @@ main{flex:1;min-height:0;display:flex;flex-direction:column}
         <button class="toy arrow" style="--c:var(--blue)" id="prev" aria-label="Предыдущая буква"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
         <span class="counter" id="counter">1 / 26</span>
         <button class="toy arrow" style="--c:var(--blue)" id="next" aria-label="Следующая буква"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+      </div>
+    </section>
+
+    <section class="scene" id="words" hidden>
+      <div class="chips" role="group" aria-label="Какие слова показывать">
+        <button class="chip" data-cat="all" aria-pressed="true">Все</button>
+        <button class="chip" data-cat="animal" aria-pressed="false">🐾 Животные</button>
+        <button class="chip" data-cat="plant" aria-pressed="false">🌱 Растения</button>
+      </div>
+      <div class="wcard" id="wcard">
+        <button class="wemo" id="wEmo" aria-label="Послушать слово">🐻</button>
+        <div class="wword" id="wWord">Bear</div>
+        <div class="wsyl" id="wSyl" hidden></div>
+        <div class="wtr" id="wTr"><small>читается</small><span id="wTrTxt">[бэр]</span></div>
+        <div class="wipa" id="wIpa">/ber/</div>
+        <div class="wru ru" id="wRu">медведь</div>
+      </div>
+      <div class="counter" id="wCount">1 / 51</div>
+      <div class="wbtns">
+        <button class="toy arrow" style="--c:var(--blue)" id="wPrev" aria-label="Предыдущее слово"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <button class="toy sbtn" id="wSay"><span class="si" aria-hidden="true">🔊</span>Слушать</button>
+        <button class="toy sbtn" id="wSlow"><span class="si" aria-hidden="true">🐢</span>Медленно</button>
+        <button class="toy arrow" style="--c:var(--blue)" id="wNext" aria-label="Следующее слово"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
       </div>
     </section>
 
@@ -267,6 +335,43 @@ const LET = RAW.trim().split('\n').map((line, i) => {
 });
 const PICS = LET.flatMap(l => l.items);
 
+/* Произношение: слоги | транскрипция русскими буквами (ударение — знаком) | международная (американский вариант) */
+const WI = {
+  'Ant': ['Ant', 'энт', 'ænt'], 'Apple': ['Ap·ple', 'э́пл', 'ˈæp.əl'],
+  'Bear': ['Bear', 'бэр', 'ber'], 'Banana': ['Ba·na·na', 'бэнэ́нэ', 'bəˈnæn.ə'],
+  'Cat': ['Cat', 'кэт', 'kæt'], 'Cactus': ['Cac·tus', 'кэ́ктэс', 'ˈkæk.təs'],
+  'Dog': ['Dog', 'дог', 'dɑːɡ'], 'Daisy': ['Dai·sy', 'дэ́йзи', 'ˈdeɪ.zi'],
+  'Elephant': ['El·e·phant', 'э́лэфэнт', 'ˈel.ə.fənt'], 'Evergreen': ['Ev·er·green', 'э́вэргрин', 'ˈev.ɚ.ɡriːn'],
+  'Frog': ['Frog', 'фрог', 'frɑːɡ'], 'Flower': ['Flow·er', 'фла́уэр', 'ˈflaʊ.ɚ'],
+  'Giraffe': ['Gi·raffe', 'джирэ́ф', 'dʒəˈræf'], 'Grapes': ['Grapes', 'грэйпс', 'ɡreɪps'],
+  'Hedgehog': ['Hedge·hog', 'хэ́джхог', 'ˈhedʒ.hɑːɡ'], 'Hibiscus': ['Hi·bis·cus', 'хиби́скэс', 'hɪˈbɪs.kəs'],
+  'Insect': ['In·sect', 'и́нсэкт', 'ˈɪn.sekt'], 'Ivy': ['I·vy', 'а́йви', 'ˈaɪ.vi'],
+  'Jellyfish': ['Jel·ly·fish', 'джэ́лифиш', 'ˈdʒel.i.fɪʃ'], 'Jalapeño': ['Ja·la·pe·ño', 'халапэ́ньо', 'ˌhɑː.ləˈpeɪ.njoʊ'],
+  'Kangaroo': ['Kan·ga·roo', 'кэнгэру́', 'ˌkæŋ.ɡəˈruː'], 'Kiwi': ['Ki·wi', 'ки́ви', 'ˈkiː.wi'],
+  'Lion': ['Li·on', 'ла́йэн', 'ˈlaɪ.ən'], 'Lemon': ['Lem·on', 'лэ́мэн', 'ˈlem.ən'],
+  'Monkey': ['Mon·key', 'ма́нки', 'ˈmʌŋ.ki'], 'Mango': ['Man·go', 'мэ́нгоу', 'ˈmæŋ.ɡoʊ'],
+  'Newt': ['Newt', 'нут', 'nuːt'], 'Nut': ['Nut', 'нат', 'nʌt'],
+  'Owl': ['Owl', 'аул', 'aʊl'], 'Orange': ['Or·ange', 'о́риндж', 'ˈɔːr.ɪndʒ'],
+  'Penguin': ['Pen·guin', 'пэ́нгуин', 'ˈpeŋ.ɡwɪn'], 'Pineapple': ['Pine·ap·ple', 'па́йнэпл', 'ˈpaɪn.æp.əl'],
+  'Queen bee': ['Queen bee', 'квин би', 'ˌkwiːn ˈbiː'], 'Quince': ['Quince', 'квинс', 'kwɪns'],
+  'Rabbit': ['Rab·bit', 'рэ́бит', 'ˈræb.ɪt'], 'Rose': ['Rose', 'роуз', 'roʊz'],
+  'Snail': ['Snail', 'снэйл', 'sneɪl'], 'Sunflower': ['Sun·flow·er', 'са́нфлауэр', 'ˈsʌn.flaʊ.ɚ'],
+  'Tiger': ['Ti·ger', 'та́йгер', 'ˈtaɪ.ɡɚ'], 'Tulip': ['Tu·lip', 'ту́лип', 'ˈtuː.lɪp'],
+  'Unicorn': ['U·ni·corn', 'ю́никорн', 'ˈjuː.nə.kɔːrn'],
+  'Viper': ['Vi·per', 'ва́йпер', 'ˈvaɪ.pɚ'], 'Violet': ['Vi·o·let', 'ва́йолэт', 'ˈvaɪə.lət'],
+  'Whale': ['Whale', 'уэйл', 'weɪl'], 'Watermelon': ['Wa·ter·mel·on', 'уо́тэрмэлэн', 'ˈwɑː.t̬ɚ.mel.ən'],
+  'Fox': ['Fox', 'фокс', 'fɑːks'], 'Ox': ['Ox', 'окс', 'ɑːks'],
+  'Yak': ['Yak', 'йэк', 'jæk'], 'Yam': ['Yam', 'йэм', 'jæm'],
+  'Zebra': ['Ze·bra', 'зи́брэ', 'ˈziː.brə'], 'Zucchini': ['Zuc·chi·ni', 'зуки́ни', 'zuˈkiː.ni']
+};
+const ANIMAL_SECOND = new Set(['Ox']);
+LET.forEach(l => l.items.forEach((it, k) => {
+  const w = WI[it.word] || [it.word, '', ''];
+  it.syl = w[0]; it.tr = w[1] ? '[' + w[1] + ']' : ''; it.ipa = w[2] ? '/' + w[2] + '/' : '';
+  it.cat = (k === 0 || ANIMAL_SECOND.has(it.word)) ? 'animal' : 'plant';
+  it.color = l.color;
+}));
+
 const $ = s => document.querySelector(s);
 const rand = a => a[Math.floor(Math.random() * a.length)];
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
@@ -287,36 +392,71 @@ $('#starNum').textContent = stars;
    say(RU('Найди букву'), EN('bee')) — фразы идут по очереди, каждая своим голосом. */
 let voiceEn = null, voiceRu = null;
 let ruVoice = store.get('ruvoice', true);
+/* Скорость речи: множитель к базовому темпу. По умолчанию — медленно. */
+const SPEED = { slower: 0.78, slow: 1, normal: 1.25 };
+let speed = store.get('speed', 'slow'); if (!SPEED[speed]) speed = 'slow';
+/* Улучшенные голоса iPhone (Enhanced / Premium) звучат заметно живее — берём их первыми */
+const quality = v => { const s = (v.name + ' ' + v.voiceURI); return /premium/i.test(s) ? 4 : /enhanced|улучш/i.test(s) ? 3 : 0; };
+function best(list, prefer) {
+  const score = v => quality(v) + (prefer.test(v.name) ? 1 : 0) + (v.localService ? 0.5 : 0);
+  return list.slice().sort((a, b) => score(b) - score(a))[0] || null;
+}
 function pickVoice() {
   try {
     const vs = speechSynthesis.getVoices();
     const us = vs.filter(v => /^en[-_]US/i.test(v.lang));
-    voiceEn = us.find(v => /Samantha|Nicky|Google US/i.test(v.name)) || us[0] || vs.find(v => /^en/i.test(v.lang)) || null;
-    const ru = vs.filter(v => /^ru/i.test(v.lang));
-    voiceRu = ru.find(v => /Milena|Katya|Google/i.test(v.name)) || ru[0] || null;
+    voiceEn = best(us, /Samantha|Ava|Nicky|Zoe|Google US/i) || best(vs.filter(v => /^en/i.test(v.lang)), /./);
+    voiceRu = best(vs.filter(v => /^ru/i.test(v.lang)), /Milena|Katya|Google/i);
   } catch (e) {}
 }
 if ('speechSynthesis' in window) { pickVoice(); try { speechSynthesis.onvoiceschanged = pickVoice; } catch (e) {} }
-const EN = t => ({ t, lang: 'en' });
-const RU = t => ({ t, lang: 'ru' });
+
+/* Части фразы. EN/RU — текст своим голосом (можно задать rate/pitch/gap), PAUSE — тишина в мс. */
+const EN = (t, o) => Object.assign({ t, lang: 'en' }, o);
+const RU = (t, o) => Object.assign({ t, lang: 'ru' }, o);
+const PAUSE = ms => ({ pause: ms });
+let sayToken = 0, sayTimer = null;
 function say(...parts) {
   if (!('speechSynthesis' in window)) return;
-  try {
-    speechSynthesis.cancel();
-    parts.forEach(p => {
-      if (typeof p === 'string') p = EN(p);
-      if (!p || !p.t) return;
-      const u = new SpeechSynthesisUtterance(p.t);
-      if (p.lang === 'ru') { u.lang = 'ru-RU'; if (voiceRu) u.voice = voiceRu; u.rate = 0.95; u.pitch = 1.1; }
-      else { u.lang = 'en-US'; if (voiceEn) u.voice = voiceEn; u.rate = 0.82; u.pitch = 1.15; }
-      speechSynthesis.speak(u);
-    });
-  } catch (e) {}
+  const token = ++sayToken;
+  clearTimeout(sayTimer);
+  try { speechSynthesis.cancel(); } catch (e) {}
+  const q = parts.map(p => typeof p === 'string' ? EN(p) : p).filter(Boolean);
+  const next = () => {
+    if (token !== sayToken) return;
+    const p = q.shift(); if (!p) return;
+    if (p.pause) { sayTimer = setTimeout(next, p.pause); return; }
+    if (!p.t) { next(); return; }
+    const u = new SpeechSynthesisUtterance(p.t);
+    const k = SPEED[speed];
+    if (p.lang === 'ru') { u.lang = 'ru-RU'; if (voiceRu) u.voice = voiceRu; u.rate = (p.rate || 0.88) * k; u.pitch = p.pitch || 1.12; }
+    else { u.lang = 'en-US'; if (voiceEn) u.voice = voiceEn; u.rate = (p.rate || 0.68) * k; u.pitch = p.pitch || 1.2; }
+    u.rate = Math.max(0.3, Math.min(1.6, u.rate));
+    let done = false;
+    const fin = () => {
+      if (done) return; done = true; clearTimeout(guard);
+      if (token === sayToken) sayTimer = setTimeout(next, p.gap == null ? 220 : p.gap);
+    };
+    /* страховка: на некоторых iPhone onend иногда не приходит */
+    const guard = setTimeout(fin, 1800 + p.t.length * 170 / u.rate);
+    u.onend = fin; u.onerror = fin;
+    try { speechSynthesis.speak(u); } catch (e) { fin(); }
+  };
+  next();
 }
 /* Выбор фразы: русская подсказка или английская, если русский голос выключен */
 const tell = (ruParts, enParts) => ruVoice ? say(...ruParts) : say(...enParts);
 const PRAISE = ['Молодец!', 'Умница!', 'Правильно!', 'Отлично!', 'Здорово!'];
 const TRY = ['Попробуй ещё!', 'Давай ещё разок!', 'Ищи дальше!'];
+/* Слово: бодро, пауза, ещё раз медленнее, перевод. «Elephant! … Elephant. — слон» */
+function sayWord(it) {
+  tell([EN(it.say + '!', { pitch: 1.28 }), PAUSE(450), EN(it.say, { rate: 0.52, pitch: 1.12 }), PAUSE(300), RU(it.ru)],
+       [EN(it.say + '!', { pitch: 1.28 }), PAUSE(450), EN(it.say, { rate: 0.52, pitch: 1.12 })]);
+}
+/* Совсем медленно, два раза, чтобы можно было повторить за голосом */
+function sayWordSlow(it) {
+  say(EN(it.say, { rate: 0.4, pitch: 1.1 }), PAUSE(900), EN(it.say, { rate: 0.4, pitch: 1.1 }));
+}
 
 /* sound effects */
 let ac;
@@ -368,8 +508,8 @@ function addStar(el) {
 }
 
 /* navigation */
-const TITLES = { abc: 'Алфавит', card: 'Алфавит', find: 'Найди букву', pick: 'Кто на букву?', bubbles: 'Пузырьки' };
-const SCENES = ['home', 'abc', 'card', 'find', 'pick', 'bubbles'];
+const TITLES = { abc: 'Алфавит', card: 'Алфавит', words: 'Слова', find: 'Найди букву', pick: 'Кто на букву?', bubbles: 'Пузырьки' };
+const SCENES = ['home', 'abc', 'card', 'words', 'find', 'pick', 'bubbles'];
 let cur = 'home';
 function go(name) {
   if (cur === 'bubbles' && name !== 'bubbles') stopBubbles();
@@ -378,6 +518,7 @@ function go(name) {
   const home = name === 'home';
   $('#back').hidden = home; $('#brand').hidden = !home; $('#sceneTitle').hidden = home;
   $('#sceneTitle').textContent = TITLES[name] || '';
+  if (name === 'words') showWord(wi, true, 0);
   if (name === 'find') newFind();
   if (name === 'pick') newPick();
   if (name === 'bubbles') startBubbles();
@@ -421,9 +562,9 @@ function showCard(i, talk) {
   const pics = $('#pics'); pics.className = 'pics' + (l.items.length === 1 ? ' one' : ''); pics.innerHTML = '';
   l.items.forEach(it => {
     const b = document.createElement('button'); b.className = 'pic';
-    b.innerHTML = `<span class="emo" aria-hidden="true">${it.emo}</span><span class="w">${hl(it.word, l.L)}</span><span class="ru">${it.ru}</span>` +
+    b.innerHTML = `<span class="emo" aria-hidden="true">${it.emo}</span><span class="w">${hl(it.word, l.L)}</span><span class="tr">${it.tr}</span><span class="ru">${it.ru}</span>` +
       (it.starts ? '' : `<span class="note ru">буква ${l.L.toLowerCase()} в конце</span>`);
-    b.addEventListener('click', () => { replay(b, 'say'); tell([EN(it.say), RU(it.ru)], [EN(it.say)]); });
+    b.addEventListener('click', () => { replay(b, 'say'); sayWord(it); });
     pics.appendChild(b);
   });
   applyRu(); replay($('#bigLetter'), 'say');
@@ -432,9 +573,10 @@ function showCard(i, talk) {
 /* «Буква bee. Bear — медведь.» */
 function introLetter(l) {
   const it = l.items[0];
-  tell([RU('Буква'), EN(l.name), EN(it.say), RU(it.ru)], [EN(`${l.name}. ${l.name} is for ${it.say}.`)]);
+  tell([RU('Буква'), EN(l.name + '!', { pitch: 1.3 }), PAUSE(380), EN(it.say + '!'), PAUSE(150), RU(it.ru)],
+       [EN(l.name + '!', { pitch: 1.3 }), PAUSE(380), EN(`${l.name} is for ${it.say}!`)]);
 }
-$('#bigLetter').addEventListener('click', () => { const l = LET[ci]; replay($('#bigLetter'), 'say'); say(EN(l.name)); });
+$('#bigLetter').addEventListener('click', () => { const l = LET[ci]; replay($('#bigLetter'), 'say'); say(EN(l.name + '!', { pitch: 1.3 })); });
 $('#prev').addEventListener('click', () => showCard(ci - 1, true));
 $('#next').addEventListener('click', () => showCard(ci + 1, true));
 let tx = null;
@@ -444,9 +586,56 @@ $('#card').addEventListener('touchend', e => {
   if (Math.abs(dx) > 60) showCard(ci + (dx < 0 ? 1 : -1), true);
 });
 
+/* word cards */
+let wcat = 'all', wi = 0;
+const wlist = () => wcat === 'all' ? PICS : PICS.filter(p => p.cat === wcat);
+function showWord(i, talk, dir) {
+  const list = wlist(); wi = (i + list.length) % list.length; const it = list[wi];
+  const card = $('#wcard'); card.style.setProperty('--c', it.color);
+  $('#wEmo').textContent = it.emo;
+  /* выделяем первую букву (у Fox и Ox — букву x в конце) */
+  const at = it.starts ? 0 : it.word.toUpperCase().lastIndexOf(it.letter);
+  $('#wWord').innerHTML = it.word.slice(0, at) + '<b>' + it.word[at] + '</b>' + it.word.slice(at + 1);
+  const parts = it.syl.split('·');
+  $('#wSyl').hidden = parts.length < 2;
+  $('#wSyl').innerHTML = parts.join('<i>·</i>');
+  $('#wTrTxt').textContent = it.tr; $('#wTr').hidden = !it.tr;
+  $('#wIpa').textContent = it.ipa; $('#wIpa').hidden = !it.ipa;
+  $('#wRu').textContent = it.ru;
+  $('#wCount').textContent = `${wi + 1} / ${list.length}`;
+  if (dir) { card.style.setProperty('--dir', (dir > 0 ? 28 : -28) + 'px'); replay(card, 'flip'); }
+  applyRu();
+  if (talk) { replay($('#wEmo'), 'say'); sayWord(it); }
+}
+$('#wEmo').addEventListener('click', () => { replay($('#wEmo'), 'say'); sayWord(wlist()[wi]); });
+$('#wWord').addEventListener('click', () => sayWord(wlist()[wi]));
+$('#wSay').addEventListener('click', () => { replay($('#wEmo'), 'say'); sayWord(wlist()[wi]); });
+$('#wSlow').addEventListener('click', () => { replay($('#wEmo'), 'say'); sayWordSlow(wlist()[wi]); });
+$('#wPrev').addEventListener('click', () => showWord(wi - 1, true, -1));
+$('#wNext').addEventListener('click', () => showWord(wi + 1, true, 1));
+document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
+  wcat = c.dataset.cat;
+  document.querySelectorAll('.chip').forEach(x => x.setAttribute('aria-pressed', String(x === c)));
+  showWord(0, true, 1);
+}));
+let wtx = null;
+$('#wcard').addEventListener('touchstart', e => { wtx = e.touches[0].clientX; }, { passive: true });
+$('#wcard').addEventListener('touchend', e => {
+  if (wtx == null) return; const dx = e.changedTouches[0].clientX - wtx; wtx = null;
+  if (Math.abs(dx) > 60) showWord(wi + (dx < 0 ? 1 : -1), true, dx < 0 ? 1 : -1);
+});
+
+/* speech speed (parents) */
+function applySpeed() { document.querySelectorAll('[data-speed]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.speed === speed))); }
+document.querySelectorAll('[data-speed]').forEach(b => b.addEventListener('click', () => {
+  speed = b.dataset.speed; store.set('speed', speed); applySpeed();
+  say(EN('Elephant!', { pitch: 1.28 }), PAUSE(300), EN('Elephant', { rate: 0.52, pitch: 1.12 }));
+}));
+applySpeed();
+
 /* game 1: find the letter */
 let findT = null, findLock = false;
-function sayFind() { if (findT) tell([RU('Найди букву'), EN(findT.name)], [EN(`Find the letter ${findT.name}!`)]); }
+function sayFind() { if (findT) tell([RU('Найди букву'), EN(findT.name + '!', { pitch: 1.3 })], [EN(`Find the letter ${findT.name}!`)]); }
 function newFind() {
   findLock = false;
   let t; do { t = rand(LET); } while (findT && t === findT);
@@ -461,11 +650,11 @@ function newFind() {
       if (findLock) return;
       if (o === findT) {
         findLock = true; replay(b, 'right'); sfx.yay(); addStar(b);
-        tell([RU(rand(PRAISE) + ' Это буква'), EN(o.name)], [EN(`Yes! ${o.name}!`)]);
+        tell([RU(rand(PRAISE), { pitch: 1.3 }), RU('Это буква'), EN(o.name + '!', { pitch: 1.3 })], [EN('Yes!', { pitch: 1.35 }), EN(o.name + '!', { pitch: 1.3 })]);
         box.querySelectorAll('.choice').forEach(x => { if (x !== b) x.classList.add('faded'); });
         setTimeout(() => { if (cur === 'find') newFind(); }, 1700);
       } else {
-        replay(b, 'wobble'); sfx.no(); tell([RU('Это буква'), EN(o.name), RU(rand(TRY) + ' Найди букву'), EN(findT.name)], [EN(`That is ${o.name}. Find ${findT.name}!`)]);
+        replay(b, 'wobble'); sfx.no(); tell([RU('Это буква'), EN(o.name), PAUSE(300), RU(rand(TRY) + ' Найди букву'), EN(findT.name + '!', { pitch: 1.3 })], [EN(`That is ${o.name}.`), PAUSE(300), EN(`Find ${findT.name}!`)]);
       }
     });
     box.appendChild(b);
@@ -476,7 +665,7 @@ $('#findSay').addEventListener('click', sayFind);
 
 /* game 2: who starts with */
 let pickT = null, pickLock = false;
-function sayPick() { if (pickT) tell([RU('Кто начинается на букву'), EN(pickT.name)], [EN(`Who starts with ${pickT.name}?`)]); }
+function sayPick() { if (pickT) tell([RU('Кто начинается на букву'), EN(pickT.name + '?', { pitch: 1.3 })], [EN(`Who starts with ${pickT.name}?`)]); }
 function newPick() {
   pickLock = false;
   const pool = LET.filter(l => l.items.some(i => i.starts));
@@ -494,11 +683,11 @@ function newPick() {
       if (p === right) {
         pickLock = true; replay(b, 'right'); sfx.yay(); addStar(b);
         b.querySelector('.w').innerHTML = hl(p.word, t.L); b.style.setProperty('--c', t.color);
-        tell([RU(rand(PRAISE)), EN(p.say), RU(p.ru)], [EN(`Yes! ${p.say}! ${t.name} is for ${p.say}.`)]);
+        tell([RU(rand(PRAISE), { pitch: 1.3 }), EN(p.say + '!'), PAUSE(150), RU(p.ru)], [EN('Yes!', { pitch: 1.35 }), EN(p.say + '!'), PAUSE(300), EN(`${t.name} is for ${p.say}!`)]);
         box.querySelectorAll('.pic').forEach(x => { if (x !== b) x.classList.add('faded'); });
         setTimeout(() => { if (cur === 'pick') newPick(); }, 2300);
       } else {
-        replay(b, 'wobble'); sfx.no(); tell([EN(p.say), RU(p.ru + ' — на другую букву. ' + rand(TRY))], [EN(`${p.say}. Try again!`)]);
+        replay(b, 'wobble'); sfx.no(); tell([EN(p.say), RU(p.ru + ' — на другую букву.'), PAUSE(200), RU(rand(TRY))], [EN(p.say + '.'), PAUSE(250), EN('Try again!')]);
       }
     });
     box.appendChild(b);
@@ -507,7 +696,7 @@ function newPick() {
   setTimeout(sayPick, 300);
 }
 $('#pickSay').addEventListener('click', sayPick);
-$('#pickTarget').addEventListener('click', () => { replay($('#pickTarget'), 'right'); say(EN(pickT.name)); });
+$('#pickTarget').addEventListener('click', () => { replay($('#pickTarget'), 'right'); say(EN(pickT.name + '!', { pitch: 1.3 })); });
 
 /* game 3: bubbles */
 let bubbles = [], spawnT = null, raf = null, lastT = 0, popped = 0;
@@ -534,7 +723,7 @@ function loop(t) {
 function popBubble(b) {
   if (!bubbles.includes(b)) return;
   bubbles = bubbles.filter(x => x !== b);
-  sfx.pop(); say(EN(`${b.l.name}! ${b.l.items[0].say}!`));
+  sfx.pop(); say(EN(b.l.name + '!', { pitch: 1.3, gap: 120 }), EN(b.l.items[0].say + '!'));
   const r = b.el.getBoundingClientRect(), ar = area.getBoundingClientRect();
   const f = document.createElement('span'); f.className = 'float'; f.textContent = b.l.items[0].emo;
   f.style.left = (r.left - ar.left + r.width / 2 - 28) + 'px'; f.style.top = (r.top - ar.top + r.height / 2 - 28) + 'px';
