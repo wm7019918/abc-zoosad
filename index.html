@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="description" content="Английский алфавит для малышей: животные и растения на каждую букву, озвучка и мини-игры.">
+<meta name="theme-color" content="#D3ECFF">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ABC Зоосад">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<title>ABC Зоосад</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+[hidden]{display:none!important}
+img{max-width:100%}
+/* Layout: one-screen toy app — top bar, one active scene, a strip of meadow pinned to the bottom */
+:root{
+  --sky:#D3ECFF; --sky2:#F4FAFF; --card:#FFFFFF; --ink:#263043; --ink-soft:#5E6A82; --on-color:#FFFFFF;
+  --grass:#7CCB5E; --grass-d:#56A845; --sun:#FFC93C;
+  --berry:#E4505B; --orange:#EA7F1F; --green:#259A58; --blue:#2A82D6; --purple:#8156DC; --pink:#D84C8A;
+  --font-letter:"Fredoka","Arial Rounded MT Bold","Trebuchet MS",system-ui,sans-serif;
+  --font-ui:"Nunito","Trebuchet MS",system-ui,sans-serif;
+  --meadow:52px;
+  color-scheme:light;
+}
+html{height:100%;box-sizing:border-box}
+*,*::before,*::after{box-sizing:inherit}
+body{height:100%;margin:0;background-color:var(--sky2);background-image:linear-gradient(180deg,var(--sky) 0%,var(--sky2) 72%);color:var(--ink);font-family:var(--font-ui);overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-touch-callout:none}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-appearance:none;appearance:none}
+button:focus-visible{outline:4px solid var(--blue);outline-offset:3px}
+
+#app{position:relative;z-index:1;height:100%;max-width:880px;margin:0 auto;padding-inline:16px;padding-bottom:calc(var(--meadow) - 10px);display:flex;flex-direction:column}
+
+/* Top bar */
+.topbar{display:flex;align-items:center;gap:12px;padding-block:10px 8px;flex:none}
+.iconbtn{width:54px;height:54px;flex:none;border-radius:50%;border:0;background:var(--card);display:grid;place-items:center;box-shadow:0 4px 0 rgba(38,48,67,.14);transition:transform .08s}
+.iconbtn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(38,48,67,.14)}
+.brand{font-family:var(--font-letter);font-weight:700;font-size:28px;line-height:1;display:flex;align-items:baseline;gap:6px;white-space:nowrap}
+.brand .abc span:nth-child(1){color:var(--berry)}.brand .abc span:nth-child(2){color:var(--blue)}.brand .abc span:nth-child(3){color:var(--green)}
+.brand .zoo{font-family:var(--font-ui);font-weight:900;font-size:22px;color:var(--ink)}
+.scene-title{font-weight:900;font-size:21px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stars{margin-left:auto;flex:none;background:var(--card);border-radius:999px;padding:8px 14px 8px 10px;font-weight:900;font-size:21px;display:flex;align-items:center;gap:6px;box-shadow:0 4px 0 rgba(38,48,67,.12);font-variant-numeric:tabular-nums}
+.stars.bump{animation:bump .5s}
+
+main{flex:1;min-height:0;display:flex;flex-direction:column}
+.scene{flex:1;min-height:0;display:flex;flex-direction:column}
+
+/* Chunky toy buttons */
+.toy{border:0;border-radius:26px;background:var(--c,var(--card));color:var(--on-color);box-shadow:0 6px 0 rgba(0,0,0,.2);transition:transform .08s,box-shadow .08s}
+.toy:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,.2)}
+
+/* Home */
+#home{overflow-y:auto;gap:18px;padding-block:6px 14px}
+.hero{display:flex;justify-content:center;gap:14px;padding-top:26px}
+.hero .blk{position:relative;width:clamp(78px,24vw,120px);aspect-ratio:1;font-family:var(--font-letter);font-weight:600;font-size:clamp(50px,15vw,80px);line-height:1;display:grid;place-items:center;border-radius:24px}
+.hero .blk .peek{position:absolute;top:-30px;left:50%;transform:translateX(-50%);font-size:clamp(36px,10vw,50px);line-height:1}
+.hero .blk:nth-child(2){animation-delay:.25s}.hero .blk:nth-child(3){animation-delay:.5s}
+.hero .blk{animation:bob 2.6s ease-in-out infinite}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.mode{min-height:142px;padding:14px 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center}
+.mode .ico{font-size:52px;line-height:1}
+.mode .lbl{font-weight:900;font-size:20px;line-height:1.1}
+.mode .en{font-family:var(--font-letter);font-weight:500;font-size:14px;opacity:.85}
+.parents{background:rgba(255,255,255,.7);border-radius:18px;padding:12px 14px;font-size:14px;line-height:1.45;color:var(--ink-soft);font-weight:700;display:flex;flex-direction:column;gap:10px}
+.parents b{color:var(--ink)}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--ink);font-weight:800;font-size:15px}
+.switch button{width:58px;height:34px;border-radius:999px;border:0;background:#C9D3E2;position:relative;flex:none;transition:background .2s}
+.switch button::after{content:"";position:absolute;top:4px;left:4px;width:26px;height:26px;border-radius:50%;background:var(--card);box-shadow:0 2px 3px rgba(0,0,0,.2);transition:transform .2s}
+.switch button[aria-pressed="true"]{background:var(--green)}
+.switch button[aria-pressed="true"]::after{transform:translateX(24px)}
+
+/* ABC grid */
+#abc{overflow-y:auto;padding-block:4px 14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:12px}
+.tile{aspect-ratio:1;position:relative;border-radius:22px;font-family:var(--font-letter);font-weight:600;font-size:clamp(38px,10vw,54px);line-height:1;display:grid;place-items:center}
+.tile .mini{position:absolute;right:5px;bottom:4px;font-size:20px;line-height:1}
+
+/* Letter card */
+#card{align-items:center;justify-content:center;gap:clamp(10px,3vh,22px);padding-bottom:6px}
+.bigletter{border:0;background:none;padding:0;font-family:var(--font-letter);font-weight:600;line-height:.9;color:var(--c);font-size:clamp(100px,30vmin,190px);display:flex;align-items:baseline;gap:.06em;text-shadow:0 7px 0 rgba(38,48,67,.08)}
+.bigletter .lc{font-size:.62em;opacity:.75}
+.bigletter.say{animation:bump .5s}
+.pics{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;max-width:540px}
+.pics.one{grid-template-columns:minmax(0,260px);justify-content:center}
+.pic{border:0;border-radius:28px;background:var(--card);padding:12px 8px 14px;display:flex;flex-direction:column;align-items:center;gap:2px;box-shadow:0 6px 0 rgba(38,48,67,.12);transition:transform .08s;min-width:0}
+.pic:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(38,48,67,.12)}
+.pic .emo{font-size:clamp(64px,19vmin,110px);line-height:1.15}
+.pic .w{font-family:var(--font-letter);font-weight:600;font-size:clamp(20px,6vw,28px);line-height:1.15;color:var(--ink)}
+.pic .w b{color:var(--c);font-weight:700}
+.pic .ru{font-size:14px;color:var(--ink-soft);font-weight:800}
+.pic .note{font-size:12px;color:var(--ink-soft);font-weight:800;background:#EEF2F8;border-radius:999px;padding:2px 8px;margin-top:4px}
+.pic.say .emo{animation:wiggle .6s}
+.navrow{display:flex;justify-content:space-between;align-items:center;width:100%;max-width:540px}
+.arrow{width:70px;height:70px;border-radius:50%;display:grid;place-items:center}
+.counter{font-family:var(--font-letter);font-weight:600;font-size:18px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+
+/* Shared game parts */
+.prompt{display:flex;align-items:center;justify-content:center;gap:14px;padding-block:6px 4px}
+.speaker{width:66px;height:66px;border-radius:50%;--c:var(--sun);color:var(--ink);display:grid;place-items:center}
+.prompt .txt{font-weight:900;font-size:22px;line-height:1.15}
+.prompt .txt small{display:block;font-family:var(--font-letter);font-weight:500;font-size:15px;color:var(--ink-soft)}
+
+#find .choices{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-content:center}
+.choice{aspect-ratio:3/4;max-height:52vh;font-family:var(--font-letter);font-weight:600;font-size:clamp(66px,21vw,128px);line-height:1;display:grid;place-items:center;border-radius:30px}
+
+#pick{gap:10px}
+.target{align-self:center;width:clamp(116px,32vmin,170px);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;font-family:var(--font-letter);font-weight:600;font-size:clamp(70px,20vmin,110px);line-height:1;margin-top:4px}
+#pick .choices{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-content:center}
+#pick .pic{padding:14px 4px}
+#pick .pic .emo{font-size:clamp(54px,17vw,100px)}
+
+.right{animation:bump .6s}
+.wobble{animation:wobble .5s}
+.faded{opacity:.35;pointer-events:none}
+
+/* Bubbles */
+#bubbles{gap:8px}
+#bubbleArea{position:relative;flex:1;min-height:0;overflow:hidden;border-radius:30px;background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,.15));touch-action:none}
+.bubble{position:absolute;left:0;top:0;width:var(--s);height:var(--s);border-radius:50%;border:0;padding:0;background:var(--c);color:var(--on-color);font-family:var(--font-letter);font-weight:600;font-size:calc(var(--s) * .5);line-height:1;display:grid;place-items:center;box-shadow:inset -7px -10px 0 rgba(0,0,0,.13),inset 7px 8px 0 rgba(255,255,255,.35);will-change:transform}
+.bubble::before{content:"";position:absolute;top:14%;left:20%;width:20%;height:13%;border-radius:50%;background:rgba(255,255,255,.85);transform:rotate(-30deg)}
+.float{position:absolute;font-size:56px;line-height:1;pointer-events:none}
+.popcount{text-align:center;font-weight:900;font-size:16px;color:var(--ink-soft)}
+
+/* Effects layer and meadow */
+#fx{position:fixed;inset:0;pointer-events:none;z-index:5;overflow:hidden}
+#fx span{position:absolute;font-size:28px;line-height:1}
+.meadow{position:fixed;left:0;right:0;bottom:0;z-index:0;height:calc(var(--meadow) + env(safe-area-inset-bottom,0px));background:var(--grass);pointer-events:none}
+.meadow svg{position:absolute;left:0;bottom:100%;width:100%;height:26px;display:block}
+
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes bump{0%{transform:scale(1)}35%{transform:scale(1.14)}65%{transform:scale(.96)}100%{transform:scale(1)}}
+@keyframes wobble{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px) rotate(-4deg)}40%{transform:translateX(9px) rotate(3deg)}60%{transform:translateX(-6px)}80%{transform:translateX(4px)}}
+@keyframes wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-10deg) scale(1.08)}75%{transform:rotate(9deg) scale(1.08)}}
+
+@media (orientation:landscape) and (max-height:520px){
+  .modes{grid-template-columns:repeat(4,1fr)}
+  .mode{min-height:120px}
+  .hero{padding-top:30px}
+  .choice{aspect-ratio:auto;height:46vh}
+  #card{flex-direction:row;flex-wrap:wrap}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <button class="iconbtn" id="back" hidden aria-label="Назад">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="brand" id="brand"><span class="abc"><span>A</span><span>B</span><span>C</span></span><span class="zoo">Зоосад</span></div>
+    <div class="scene-title" id="sceneTitle" hidden></div>
+    <div class="stars" id="stars" aria-label="Звёздочки"><span aria-hidden="true">⭐</span><span id="starNum">0</span></div>
+  </header>
+
+  <main>
+    <section class="scene" id="home">
+      <div class="hero">
+        <button class="toy blk" style="--c:var(--berry)" data-hero="0"><span class="peek">🐜</span>A</button>
+        <button class="toy blk" style="--c:var(--blue)" data-hero="1"><span class="peek">🐻</span>B</button>
+        <button class="toy blk" style="--c:var(--green)" data-hero="2"><span class="peek">🐱</span>C</button>
+      </div>
+      <div class="modes">
+        <button class="toy mode" style="--c:var(--orange)" data-go="abc"><span class="ico">🔤</span><span class="lbl">Алфавит</span><span class="en">ABC</span></button>
+        <button class="toy mode" style="--c:var(--purple)" data-go="find"><span class="ico">🔎</span><span class="lbl">Найди букву</span><span class="en">Find the letter</span></button>
+        <button class="toy mode" style="--c:var(--green)" data-go="pick"><span class="ico">🦒</span><span class="lbl">Кто на букву?</span><span class="en">Who starts with…</span></button>
+        <button class="toy mode" style="--c:var(--blue)" data-go="bubbles"><span class="ico">🫧</span><span class="lbl">Пузырьки</span><span class="en">Pop the letters</span></button>
+      </div>
+      <div class="parents">
+        <div><b>Для родителей.</b> Включите звук: на iPhone боковой переключатель «Без звука» должен быть выключен. Все слова озвучиваются по-английски. За правильные ответы малыш получает звёздочки, ошибки не наказываются.</div>
+        <div class="switch"><span>Показывать перевод на русский</span><button id="ruToggle" aria-pressed="true" aria-label="Перевод на русский"></button></div>
+      </div>
+    </section>
+
+    <section class="scene" id="abc" hidden>
+      <div class="grid" id="grid"></div>
+    </section>
+
+    <section class="scene" id="card" hidden>
+      <button class="bigletter" id="bigLetter" aria-label="Произнести букву"><span id="bigU">A</span><span class="lc" id="bigL">a</span></button>
+      <div class="pics" id="pics"></div>
+      <div class="navrow">
+        <button class="toy arrow" style="--c:var(--blue)" id="prev" aria-label="Предыдущая буква"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <span class="counter" id="counter">1 / 26</span>
+        <button class="toy arrow" style="--c:var(--blue)" id="next" aria-label="Следующая буква"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+      </div>
+    </section>
+
+    <section class="scene" id="find" hidden>
+      <div class="prompt">
+        <button class="toy speaker" id="findSay" aria-label="Повторить задание"><svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 4V5L7 9H3z"/><path d="M15.5 8.5a5 5 0 010 7M18 6a8.5 8.5 0 010 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
+        <div class="txt">Найди букву<small id="findHint">Find the letter</small></div>
+      </div>
+      <div class="choices" id="findChoices"></div>
+    </section>
+
+    <section class="scene" id="pick" hidden>
+      <div class="prompt">
+        <button class="toy speaker" id="pickSay" aria-label="Повторить задание"><svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 4V5L7 9H3z"/><path d="M15.5 8.5a5 5 0 010 7M18 6a8.5 8.5 0 010 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
+        <div class="txt">Кто на эту букву?<small>Who starts with…</small></div>
+      </div>
+      <button class="toy target" id="pickTarget" aria-label="Произнести букву">A</button>
+      <div class="choices" id="pickChoices"></div>
+    </section>
+
+    <section class="scene" id="bubbles" hidden>
+      <div id="bubbleArea" aria-label="Лопай пузырьки с буквами"></div>
+      <div class="popcount" id="popCount">Лопай пузырьки!</div>
+    </section>
+  </main>
+</div>
+
+<div class="meadow" aria-hidden="true">
+  <svg viewBox="0 0 400 26" preserveAspectRatio="none"><path d="M0 26 Q 25 4 50 16 T 100 14 T 150 16 T 200 10 T 250 16 T 300 12 T 350 16 T 400 10 V26 Z" fill="#7CCB5E"/></svg>
+</div>
+<div id="fx" aria-hidden="true"></div>
+
+<script>
+(function(){
+const RAW = `A|ay|Ant|муравей|🐜|Apple|яблоко|🍎
+B|bee|Bear|медведь|🐻|Banana|банан|🍌
+C|see|Cat|кошка|🐱|Cactus|кактус|🌵
+D|dee|Dog|собака|🐶|Daisy|ромашка|🌼
+E|ee|Elephant|слон|🐘|Evergreen|ёлка|🌲
+F|ef|Frog|лягушка|🐸|Flower|цветок|🌸
+G|jee|Giraffe|жираф|🦒|Grapes|виноград|🍇
+H|aitch|Hedgehog|ёжик|🦔|Hibiscus|гибискус|🌺
+I|eye|Insect|жучок|🐞|Ivy|плющ|🌿
+J|jay|Jellyfish|медуза|🪼|Jalapeño|перчик|🌶️
+K|kay|Kangaroo|кенгуру|🦘|Kiwi|киви|🥝
+L|el|Lion|лев|🦁|Lemon|лимон|🍋
+M|em|Monkey|обезьянка|🐵|Mango|манго|🥭
+N|en|Newt|тритон|🦎|Nut|орех|🌰
+O|oh|Owl|сова|🦉|Orange|апельсин|🍊
+P|pee|Penguin|пингвин|🐧|Pineapple|ананас|🍍
+Q|cue|Queen bee|пчёлка-королева|🐝|Quince|айва|🍐
+R|ar|Rabbit|кролик|🐰|Rose|роза|🌹
+S|ess|Snail|улитка|🐌|Sunflower|подсолнух|🌻
+T|tee|Tiger|тигр|🐯|Tulip|тюльпан|🌷
+U|you|Unicorn|единорог|🦄
+V|vee|Viper|змейка|🐍|Violet|фиалка|🪻
+W|double you|Whale|кит|🐳|Watermelon|арбуз|🍉
+X|ex|Fox|лиса|🦊|Ox|бык|🐂
+Y|why|Yak|як|🐃|Yam|батат|🍠
+Z|zee|Zebra|зебра|🦓|Zucchini|кабачок|🥒`;
+
+const COLORS = ['--berry','--orange','--green','--blue','--purple','--pink'];
+const LET = RAW.trim().split('\n').map((line, i) => {
+  const p = line.split('|'); const items = [];
+  for (let k = 2; k + 2 < p.length; k += 3) {
+    const word = p[k];
+    items.push({ word, ru: p[k+1], emo: p[k+2], letter: p[0], starts: word[0].toUpperCase() === p[0],
+      say: word.normalize('NFD').replace(/[̀-ͯ]/g, '') });
+  }
+  return { L: p[0], name: p[1], items, i, color: 'var(' + COLORS[i % COLORS.length] + ')' };
+});
+const PICS = LET.flatMap(l => l.items);
+
+const $ = s => document.querySelector(s);
+const rand = a => a[Math.floor(Math.random() * a.length)];
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const sample = (a, n) => shuffle(a).slice(0, n);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* storage (per-device convenience only) */
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('abczoo.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('abczoo.' + k, JSON.stringify(v)); } catch (e) {} }
+};
+let stars = store.get('stars', 0);
+let showRu = store.get('ru', true);
+$('#starNum').textContent = stars;
+
+/* speech */
+let voice = null;
+function pickVoice() {
+  try {
+    const vs = speechSynthesis.getVoices();
+    const us = vs.filter(v => /^en[-_]US/i.test(v.lang));
+    voice = us.find(v => /Samantha|Nicky|Google US/i.test(v.name)) || us[0] || vs.find(v => /^en/i.test(v.lang)) || null;
+  } catch (e) {}
+}
+if ('speechSynthesis' in window) { pickVoice(); try { speechSynthesis.onvoiceschanged = pickVoice; } catch (e) {} }
+function speak(text, rate) {
+  if (!('speechSynthesis' in window)) return;
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US'; if (voice) u.voice = voice;
+    u.rate = rate || 0.82; u.pitch = 1.15;
+    speechSynthesis.speak(u);
+  } catch (e) {}
+}
+
+/* sound effects */
+let ac;
+function audio() {
+  try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); return ac; } catch (e) { return null; }
+}
+function notes(freqs, type, len, vol) {
+  const a = audio(); if (!a) return; let t = a.currentTime;
+  freqs.forEach(f => {
+    const o = a.createOscillator(), g = a.createGain();
+    o.type = type; o.frequency.value = f;
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+    o.connect(g); g.connect(a.destination); o.start(t); o.stop(t + len + 0.03); t += len * 0.75;
+  });
+}
+const sfx = {
+  yay: () => notes([523, 659, 784, 1047], 'triangle', 0.16, 0.2),
+  no: () => notes([247, 208], 'sine', 0.2, 0.14),
+  pop: () => { const a = audio(); if (!a) return; const t = a.currentTime, o = a.createOscillator(), g = a.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(900, t); o.frequency.exponentialRampToValueAtTime(180, t + 0.12);
+    g.gain.setValueAtTime(0.25, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
+    o.connect(g); g.connect(a.destination); o.start(t); o.stop(t + 0.16); }
+};
+
+function replay(el, cls) { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+
+/* celebration */
+function celebrate(el) {
+  const r = el.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2, fx = $('#fx');
+  const n = reduced ? 1 : 14;
+  for (let k = 0; k < n; k++) {
+    const s = document.createElement('span');
+    s.textContent = rand(['⭐', '🌼', '🍃', '✨', '🌸']);
+    s.style.left = (cx - 14) + 'px'; s.style.top = (cy - 14) + 'px';
+    fx.appendChild(s);
+    if (reduced) { setTimeout(() => s.remove(), 700); continue; }
+    const ang = Math.random() * Math.PI * 2, dist = 90 + Math.random() * 120;
+    const anim = s.animate([
+      { transform: 'translate(0,0) scale(.4)', opacity: 1 },
+      { transform: `translate(${Math.cos(ang) * dist}px,${Math.sin(ang) * dist - 40}px) scale(1.2) rotate(${Math.random() * 200 - 100}deg)`, opacity: 0 }
+    ], { duration: 900 + Math.random() * 300, easing: 'cubic-bezier(.2,.7,.3,1)' });
+    anim.onfinish = () => s.remove();
+  }
+}
+function addStar(el) {
+  stars++; store.set('stars', stars);
+  $('#starNum').textContent = stars; replay($('#stars'), 'bump');
+  celebrate(el);
+}
+
+/* navigation */
+const TITLES = { abc: 'Алфавит', card: 'Алфавит', find: 'Найди букву', pick: 'Кто на букву?', bubbles: 'Пузырьки' };
+const SCENES = ['home', 'abc', 'card', 'find', 'pick', 'bubbles'];
+let cur = 'home';
+function go(name) {
+  if (cur === 'bubbles' && name !== 'bubbles') stopBubbles();
+  SCENES.forEach(s => { $('#' + s).hidden = s !== name; });
+  cur = name;
+  const home = name === 'home';
+  $('#back').hidden = home; $('#brand').hidden = !home; $('#sceneTitle').hidden = home;
+  $('#sceneTitle').textContent = TITLES[name] || '';
+  if (name === 'find') newFind();
+  if (name === 'pick') newPick();
+  if (name === 'bubbles') startBubbles();
+}
+$('#back').addEventListener('click', () => { try { speechSynthesis.cancel(); } catch (e) {} go(cur === 'card' ? 'abc' : 'home'); });
+document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => { audio(); go(b.dataset.go); }));
+document.querySelectorAll('[data-hero]').forEach(b => b.addEventListener('click', () => {
+  const l = LET[+b.dataset.hero]; replay(b, 'right'); speak(`${l.name}. ${l.name} is for ${l.items[0].say}.`);
+}));
+
+/* russian toggle */
+function applyRu() { $('#ruToggle').setAttribute('aria-pressed', String(showRu)); document.querySelectorAll('.ru').forEach(e => e.hidden = !showRu); }
+$('#ruToggle').addEventListener('click', () => { showRu = !showRu; store.set('ru', showRu); applyRu(); });
+
+/* ABC grid */
+const grid = $('#grid');
+LET.forEach(l => {
+  const b = document.createElement('button');
+  b.className = 'toy tile'; b.style.setProperty('--c', l.color);
+  b.innerHTML = `${l.L}<span class="mini" aria-hidden="true">${l.items[0].emo}</span>`;
+  b.setAttribute('aria-label', 'Буква ' + l.L);
+  b.addEventListener('click', () => openCard(l.i));
+  grid.appendChild(b);
+});
+
+/* letter card */
+let ci = 0;
+const hl = (word, L) => word.replace(new RegExp(L, 'gi'), m => `<b>${m}</b>`);
+function openCard(i) { go('card'); showCard(i, true); }
+function showCard(i, talk) {
+  ci = (i + LET.length) % LET.length; const l = LET[ci];
+  const card = $('#card'); card.style.setProperty('--c', l.color);
+  $('#bigU').textContent = l.L; $('#bigL').textContent = l.L.toLowerCase();
+  $('#counter').textContent = `${ci + 1} / ${LET.length}`;
+  const pics = $('#pics'); pics.className = 'pics' + (l.items.length === 1 ? ' one' : ''); pics.innerHTML = '';
+  l.items.forEach(it => {
+    const b = document.createElement('button'); b.className = 'pic';
+    b.innerHTML = `<span class="emo" aria-hidden="true">${it.emo}</span><span class="w">${hl(it.word, l.L)}</span><span class="ru">${it.ru}</span>` +
+      (it.starts ? '' : `<span class="note ru">буква ${l.L.toLowerCase()} в конце</span>`);
+    b.addEventListener('click', () => { replay(b, 'say'); speak(it.say); });
+    pics.appendChild(b);
+  });
+  applyRu(); replay($('#bigLetter'), 'say');
+  if (talk) speak(`${l.name}. ${l.name} is for ${l.items[0].say}.`);
+}
+$('#bigLetter').addEventListener('click', () => { const l = LET[ci]; replay($('#bigLetter'), 'say'); speak(l.name); });
+$('#prev').addEventListener('click', () => showCard(ci - 1, true));
+$('#next').addEventListener('click', () => showCard(ci + 1, true));
+let tx = null;
+$('#card').addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
+$('#card').addEventListener('touchend', e => {
+  if (tx == null) return; const dx = e.changedTouches[0].clientX - tx; tx = null;
+  if (Math.abs(dx) > 60) showCard(ci + (dx < 0 ? 1 : -1), true);
+});
+
+/* game 1: find the letter */
+let findT = null, findLock = false;
+function sayFind() { if (findT) speak(`Find the letter ${findT.name}!`); }
+function newFind() {
+  findLock = false;
+  let t; do { t = rand(LET); } while (findT && t === findT);
+  findT = t;
+  $('#findHint').textContent = 'Find the letter…';
+  const box = $('#findChoices'); box.innerHTML = '';
+  shuffle([t, ...sample(LET.filter(x => x !== t), 2)]).forEach(o => {
+    const b = document.createElement('button');
+    b.className = 'toy choice'; b.style.setProperty('--c', o.color); b.textContent = o.L;
+    b.setAttribute('aria-label', 'Буква ' + o.L);
+    b.addEventListener('click', () => {
+      if (findLock) return;
+      if (o === findT) {
+        findLock = true; replay(b, 'right'); sfx.yay(); addStar(b);
+        speak(`Yes! ${o.name}!`);
+        box.querySelectorAll('.choice').forEach(x => { if (x !== b) x.classList.add('faded'); });
+        setTimeout(() => { if (cur === 'find') newFind(); }, 1700);
+      } else {
+        replay(b, 'wobble'); sfx.no(); speak(`That is ${o.name}. Find ${findT.name}!`);
+      }
+    });
+    box.appendChild(b);
+  });
+  setTimeout(sayFind, 300);
+}
+$('#findSay').addEventListener('click', sayFind);
+
+/* game 2: who starts with */
+let pickT = null, pickLock = false;
+function sayPick() { if (pickT) speak(`Who starts with ${pickT.name}?`); }
+function newPick() {
+  pickLock = false;
+  const pool = LET.filter(l => l.items.some(i => i.starts));
+  let t; do { t = rand(pool); } while (pickT && t === pickT);
+  pickT = t;
+  const tgt = $('#pickTarget'); tgt.textContent = t.L; tgt.style.setProperty('--c', t.color);
+  const right = rand(t.items.filter(i => i.starts));
+  const wrong = sample(PICS.filter(p => p.word[0].toUpperCase() !== t.L), 2);
+  const box = $('#pickChoices'); box.innerHTML = '';
+  shuffle([right, ...wrong]).forEach(p => {
+    const b = document.createElement('button'); b.className = 'pic';
+    b.innerHTML = `<span class="emo" aria-hidden="true">${p.emo}</span><span class="w">${p.word}</span><span class="ru">${p.ru}</span>`;
+    b.addEventListener('click', () => {
+      if (pickLock) return;
+      if (p === right) {
+        pickLock = true; replay(b, 'right'); sfx.yay(); addStar(b);
+        b.querySelector('.w').innerHTML = hl(p.word, t.L); b.style.setProperty('--c', t.color);
+        speak(`Yes! ${p.say}! ${t.name} is for ${p.say}.`);
+        box.querySelectorAll('.pic').forEach(x => { if (x !== b) x.classList.add('faded'); });
+        setTimeout(() => { if (cur === 'pick') newPick(); }, 2300);
+      } else {
+        replay(b, 'wobble'); sfx.no(); speak(`${p.say}. Try again!`);
+      }
+    });
+    box.appendChild(b);
+  });
+  applyRu();
+  setTimeout(sayPick, 300);
+}
+$('#pickSay').addEventListener('click', sayPick);
+$('#pickTarget').addEventListener('click', () => { replay($('#pickTarget'), 'right'); speak(pickT.name); });
+
+/* game 3: bubbles */
+let bubbles = [], spawnT = null, raf = null, lastT = 0, popped = 0;
+const area = $('#bubbleArea');
+function spawn() {
+  if (bubbles.length >= 6) return;
+  const w = area.clientWidth, h = area.clientHeight; if (!w || !h) return;
+  const l = rand(LET), s = Math.round(Math.min(130, Math.max(84, w * 0.26)));
+  const el = document.createElement('button');
+  el.className = 'bubble'; el.textContent = l.L;
+  el.style.setProperty('--s', s + 'px'); el.style.setProperty('--c', l.color);
+  el.setAttribute('aria-label', 'Буква ' + l.L);
+  const b = { el, l, s, x: Math.random() * (w - s), y: h + 4, v: (0.05 + Math.random() * 0.05) * (reduced ? 0.5 : 1), ph: Math.random() * 6.28 };
+  el.addEventListener('pointerdown', e => { e.preventDefault(); popBubble(b); });
+  el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); popBubble(b); } });
+  area.appendChild(el); bubbles.push(b); place(b, 0);
+}
+function place(b, t) { const sway = reduced ? 0 : Math.sin(t / 650 + b.ph) * 14; b.el.style.transform = `translate(${b.x + sway}px,${b.y}px)`; }
+function loop(t) {
+  const dt = lastT ? Math.min(50, t - lastT) : 16; lastT = t;
+  bubbles = bubbles.filter(b => { b.y -= b.v * dt; if (b.y < -b.s - 10) { b.el.remove(); return false; } place(b, t); return true; });
+  raf = requestAnimationFrame(loop);
+}
+function popBubble(b) {
+  if (!bubbles.includes(b)) return;
+  bubbles = bubbles.filter(x => x !== b);
+  sfx.pop(); speak(`${b.l.name}! ${b.l.items[0].say}!`, 0.85);
+  const r = b.el.getBoundingClientRect(), ar = area.getBoundingClientRect();
+  const f = document.createElement('span'); f.className = 'float'; f.textContent = b.l.items[0].emo;
+  f.style.left = (r.left - ar.left + r.width / 2 - 28) + 'px'; f.style.top = (r.top - ar.top + r.height / 2 - 28) + 'px';
+  area.appendChild(f);
+  const an = f.animate([{ transform: 'scale(.3)', opacity: 1 }, { transform: 'translateY(-90px) scale(1.3)', opacity: 0 }], { duration: reduced ? 600 : 1300, easing: 'ease-out' });
+  an.onfinish = () => f.remove();
+  b.el.remove();
+  popped++; $('#popCount').textContent = `Лопнули: ${popped}`;
+  if (popped % 10 === 0) addStar(area);
+}
+function startBubbles() {
+  stopBubbles(); popped = 0; $('#popCount').textContent = 'Лопай пузырьки!';
+  lastT = 0; spawn(); spawnT = setInterval(spawn, 1100); raf = requestAnimationFrame(loop);
+}
+function stopBubbles() {
+  clearInterval(spawnT); spawnT = null; if (raf) cancelAnimationFrame(raf); raf = null;
+  bubbles.forEach(b => b.el.remove()); bubbles = []; area.querySelectorAll('.float').forEach(f => f.remove());
+}
+document.addEventListener('visibilitychange', () => { if (document.hidden && cur === 'bubbles') stopBubbles(); else if (!document.hidden && cur === 'bubbles') startBubbles(); });
+
+applyRu();
+})();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+}
+</script>
+</body>
+</html>
