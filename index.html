@@ -177,7 +177,8 @@ main{flex:1;min-height:0;display:flex;flex-direction:column}
         <button class="toy mode" style="--c:var(--blue)" data-go="bubbles"><span class="ico">🫧</span><span class="lbl">Пузырьки</span><span class="en">Pop the letters</span></button>
       </div>
       <div class="parents">
-        <div><b>Для родителей.</b> Включите звук: на iPhone боковой переключатель «Без звука» должен быть выключен. Все слова озвучиваются по-английски. За правильные ответы малыш получает звёздочки, ошибки не наказываются.</div>
+        <div><b>Для родителей.</b> Включите звук: на iPhone боковой переключатель «Без звука» должен быть выключен. Задания и похвала звучат по-русски, а буквы и слова — по-английски, с переводом. За правильные ответы малыш получает звёздочки, ошибки не наказываются.</div>
+        <div class="switch"><span>Задания голосом на русском</span><button id="ruVoiceToggle" aria-pressed="true" aria-label="Задания голосом на русском"></button></div>
         <div class="switch"><span>Показывать перевод на русский</span><button id="ruToggle" aria-pressed="true" aria-label="Перевод на русский"></button></div>
       </div>
     </section>
@@ -282,25 +283,40 @@ let showRu = store.get('ru', true);
 $('#starNum').textContent = stars;
 
 /* speech */
-let voice = null;
+/* Задания и похвала звучат по-русски, буквы и слова — по-английски.
+   say(RU('Найди букву'), EN('bee')) — фразы идут по очереди, каждая своим голосом. */
+let voiceEn = null, voiceRu = null;
+let ruVoice = store.get('ruvoice', true);
 function pickVoice() {
   try {
     const vs = speechSynthesis.getVoices();
     const us = vs.filter(v => /^en[-_]US/i.test(v.lang));
-    voice = us.find(v => /Samantha|Nicky|Google US/i.test(v.name)) || us[0] || vs.find(v => /^en/i.test(v.lang)) || null;
+    voiceEn = us.find(v => /Samantha|Nicky|Google US/i.test(v.name)) || us[0] || vs.find(v => /^en/i.test(v.lang)) || null;
+    const ru = vs.filter(v => /^ru/i.test(v.lang));
+    voiceRu = ru.find(v => /Milena|Katya|Google/i.test(v.name)) || ru[0] || null;
   } catch (e) {}
 }
 if ('speechSynthesis' in window) { pickVoice(); try { speechSynthesis.onvoiceschanged = pickVoice; } catch (e) {} }
-function speak(text, rate) {
+const EN = t => ({ t, lang: 'en' });
+const RU = t => ({ t, lang: 'ru' });
+function say(...parts) {
   if (!('speechSynthesis' in window)) return;
   try {
     speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'en-US'; if (voice) u.voice = voice;
-    u.rate = rate || 0.82; u.pitch = 1.15;
-    speechSynthesis.speak(u);
+    parts.forEach(p => {
+      if (typeof p === 'string') p = EN(p);
+      if (!p || !p.t) return;
+      const u = new SpeechSynthesisUtterance(p.t);
+      if (p.lang === 'ru') { u.lang = 'ru-RU'; if (voiceRu) u.voice = voiceRu; u.rate = 0.95; u.pitch = 1.1; }
+      else { u.lang = 'en-US'; if (voiceEn) u.voice = voiceEn; u.rate = 0.82; u.pitch = 1.15; }
+      speechSynthesis.speak(u);
+    });
   } catch (e) {}
 }
+/* Выбор фразы: русская подсказка или английская, если русский голос выключен */
+const tell = (ruParts, enParts) => ruVoice ? say(...ruParts) : say(...enParts);
+const PRAISE = ['Молодец!', 'Умница!', 'Правильно!', 'Отлично!', 'Здорово!'];
+const TRY = ['Попробуй ещё!', 'Давай ещё разок!', 'Ищи дальше!'];
 
 /* sound effects */
 let ac;
@@ -369,12 +385,18 @@ function go(name) {
 $('#back').addEventListener('click', () => { try { speechSynthesis.cancel(); } catch (e) {} go(cur === 'card' ? 'abc' : 'home'); });
 document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => { audio(); go(b.dataset.go); }));
 document.querySelectorAll('[data-hero]').forEach(b => b.addEventListener('click', () => {
-  const l = LET[+b.dataset.hero]; replay(b, 'right'); speak(`${l.name}. ${l.name} is for ${l.items[0].say}.`);
+  const l = LET[+b.dataset.hero]; replay(b, 'right'); introLetter(l);
 }));
 
 /* russian toggle */
 function applyRu() { $('#ruToggle').setAttribute('aria-pressed', String(showRu)); document.querySelectorAll('.ru').forEach(e => e.hidden = !showRu); }
 $('#ruToggle').addEventListener('click', () => { showRu = !showRu; store.set('ru', showRu); applyRu(); });
+function applyRuVoice() { $('#ruVoiceToggle').setAttribute('aria-pressed', String(ruVoice)); }
+$('#ruVoiceToggle').addEventListener('click', () => {
+  ruVoice = !ruVoice; store.set('ruvoice', ruVoice); applyRuVoice();
+  tell([RU('Задания на русском')], [EN('Tasks in English')]);
+});
+applyRuVoice();
 
 /* ABC grid */
 const grid = $('#grid');
@@ -401,13 +423,18 @@ function showCard(i, talk) {
     const b = document.createElement('button'); b.className = 'pic';
     b.innerHTML = `<span class="emo" aria-hidden="true">${it.emo}</span><span class="w">${hl(it.word, l.L)}</span><span class="ru">${it.ru}</span>` +
       (it.starts ? '' : `<span class="note ru">буква ${l.L.toLowerCase()} в конце</span>`);
-    b.addEventListener('click', () => { replay(b, 'say'); speak(it.say); });
+    b.addEventListener('click', () => { replay(b, 'say'); tell([EN(it.say), RU(it.ru)], [EN(it.say)]); });
     pics.appendChild(b);
   });
   applyRu(); replay($('#bigLetter'), 'say');
-  if (talk) speak(`${l.name}. ${l.name} is for ${l.items[0].say}.`);
+  if (talk) introLetter(l);
 }
-$('#bigLetter').addEventListener('click', () => { const l = LET[ci]; replay($('#bigLetter'), 'say'); speak(l.name); });
+/* «Буква bee. Bear — медведь.» */
+function introLetter(l) {
+  const it = l.items[0];
+  tell([RU('Буква'), EN(l.name), EN(it.say), RU(it.ru)], [EN(`${l.name}. ${l.name} is for ${it.say}.`)]);
+}
+$('#bigLetter').addEventListener('click', () => { const l = LET[ci]; replay($('#bigLetter'), 'say'); say(EN(l.name)); });
 $('#prev').addEventListener('click', () => showCard(ci - 1, true));
 $('#next').addEventListener('click', () => showCard(ci + 1, true));
 let tx = null;
@@ -419,7 +446,7 @@ $('#card').addEventListener('touchend', e => {
 
 /* game 1: find the letter */
 let findT = null, findLock = false;
-function sayFind() { if (findT) speak(`Find the letter ${findT.name}!`); }
+function sayFind() { if (findT) tell([RU('Найди букву'), EN(findT.name)], [EN(`Find the letter ${findT.name}!`)]); }
 function newFind() {
   findLock = false;
   let t; do { t = rand(LET); } while (findT && t === findT);
@@ -434,11 +461,11 @@ function newFind() {
       if (findLock) return;
       if (o === findT) {
         findLock = true; replay(b, 'right'); sfx.yay(); addStar(b);
-        speak(`Yes! ${o.name}!`);
+        tell([RU(rand(PRAISE) + ' Это буква'), EN(o.name)], [EN(`Yes! ${o.name}!`)]);
         box.querySelectorAll('.choice').forEach(x => { if (x !== b) x.classList.add('faded'); });
         setTimeout(() => { if (cur === 'find') newFind(); }, 1700);
       } else {
-        replay(b, 'wobble'); sfx.no(); speak(`That is ${o.name}. Find ${findT.name}!`);
+        replay(b, 'wobble'); sfx.no(); tell([RU('Это буква'), EN(o.name), RU(rand(TRY) + ' Найди букву'), EN(findT.name)], [EN(`That is ${o.name}. Find ${findT.name}!`)]);
       }
     });
     box.appendChild(b);
@@ -449,7 +476,7 @@ $('#findSay').addEventListener('click', sayFind);
 
 /* game 2: who starts with */
 let pickT = null, pickLock = false;
-function sayPick() { if (pickT) speak(`Who starts with ${pickT.name}?`); }
+function sayPick() { if (pickT) tell([RU('Кто начинается на букву'), EN(pickT.name)], [EN(`Who starts with ${pickT.name}?`)]); }
 function newPick() {
   pickLock = false;
   const pool = LET.filter(l => l.items.some(i => i.starts));
@@ -467,11 +494,11 @@ function newPick() {
       if (p === right) {
         pickLock = true; replay(b, 'right'); sfx.yay(); addStar(b);
         b.querySelector('.w').innerHTML = hl(p.word, t.L); b.style.setProperty('--c', t.color);
-        speak(`Yes! ${p.say}! ${t.name} is for ${p.say}.`);
+        tell([RU(rand(PRAISE)), EN(p.say), RU(p.ru)], [EN(`Yes! ${p.say}! ${t.name} is for ${p.say}.`)]);
         box.querySelectorAll('.pic').forEach(x => { if (x !== b) x.classList.add('faded'); });
         setTimeout(() => { if (cur === 'pick') newPick(); }, 2300);
       } else {
-        replay(b, 'wobble'); sfx.no(); speak(`${p.say}. Try again!`);
+        replay(b, 'wobble'); sfx.no(); tell([EN(p.say), RU(p.ru + ' — на другую букву. ' + rand(TRY))], [EN(`${p.say}. Try again!`)]);
       }
     });
     box.appendChild(b);
@@ -480,7 +507,7 @@ function newPick() {
   setTimeout(sayPick, 300);
 }
 $('#pickSay').addEventListener('click', sayPick);
-$('#pickTarget').addEventListener('click', () => { replay($('#pickTarget'), 'right'); speak(pickT.name); });
+$('#pickTarget').addEventListener('click', () => { replay($('#pickTarget'), 'right'); say(EN(pickT.name)); });
 
 /* game 3: bubbles */
 let bubbles = [], spawnT = null, raf = null, lastT = 0, popped = 0;
@@ -507,7 +534,7 @@ function loop(t) {
 function popBubble(b) {
   if (!bubbles.includes(b)) return;
   bubbles = bubbles.filter(x => x !== b);
-  sfx.pop(); speak(`${b.l.name}! ${b.l.items[0].say}!`, 0.85);
+  sfx.pop(); say(EN(`${b.l.name}! ${b.l.items[0].say}!`));
   const r = b.el.getBoundingClientRect(), ar = area.getBoundingClientRect();
   const f = document.createElement('span'); f.className = 'float'; f.textContent = b.l.items[0].emo;
   f.style.left = (r.left - ar.left + r.width / 2 - 28) + 'px'; f.style.top = (r.top - ar.top + r.height / 2 - 28) + 'px';
