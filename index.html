@@ -139,6 +139,8 @@ main{flex:1;min-height:0;display:flex;flex-direction:column}
 .chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
 .chip{border:0;border-radius:999px;padding:9px 13px;font-weight:900;font-size:15px;background:var(--card);color:var(--ink);box-shadow:0 3px 0 rgba(38,48,67,.12)}
 .chip[aria-pressed="true"]{background:var(--ink);color:var(--on-color)}
+.wmeta{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;max-width:480px}
+.mixbtn{display:flex;align-items:center;gap:6px}
 .wcard{flex:1;min-height:0;width:100%;max-width:480px;background:var(--card);border-radius:34px;box-shadow:0 8px 0 rgba(38,48,67,.12);display:flex;flex-direction:column;align-items:center;gap:2px;padding:14px 16px;text-align:center;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .wcard>.sp{flex:1 1 0;min-height:0}
 .wgroup{font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--c);background:#F1F4F9;border-radius:999px;padding:4px 12px}
@@ -267,7 +269,10 @@ main{flex:1;min-height:0;display:flex;flex-direction:column}
         <button class="wex" id="wEx" hidden aria-label="Послушать пример"><span class="wex-en" id="wExEn"></span><span class="wex-ru ru" id="wExRu"></span></button>
         <i class="sp" aria-hidden="true"></i>
       </div>
-      <div class="counter" id="wCount">1 / 100</div>
+      <div class="wmeta">
+        <button class="chip mixbtn" id="wMix" aria-pressed="false"><span aria-hidden="true">🔀</span> Вперемешку</button>
+        <div class="counter" id="wCount">1 / 100</div>
+      </div>
       <div class="wbtns">
         <button class="toy arrow" style="--c:var(--blue)" id="wPrev" aria-label="Предыдущее слово"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
         <button class="toy sbtn" id="wSay"><span class="si" aria-hidden="true">🔊</span>Слушать</button>
@@ -997,16 +1002,21 @@ $('#card').addEventListener('touchend', e => {
 });
 
 /* word cards */
-let wcat = store.get('wcat', 'noun'); if (!VOCAB[wcat]) wcat = 'noun';
+let wcat = store.get('wcat', 'noun'); if (!VOCAB[wcat] && wcat !== 'mix') wcat = 'noun';
+/* «Вперемешку»: все карточки всех вкладок в случайном порядке; новый порядок при каждом нажатии */
+const CAT_LABEL = { noun: 'существительное', verb: 'глагол', adj: 'прилагательное' };
+let mixList = null;
+const reshuffle = () => { mixList = shuffle(Object.values(VOCAB).flat()); };
 let wi = 0;
-const wlist = () => VOCAB[wcat];
+const wlist = () => { if (wcat !== 'mix') return VOCAB[wcat]; if (!mixList) reshuffle(); return mixList; };
 const esc = t => t.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
 function showWord(i, talk, dir) {
   const list = wlist(); wi = (i + list.length) % list.length; const it = list[wi];
   const card = $('#wcard'); card.style.setProperty('--c', it.color);
   $('#wEmo').textContent = it.emo;
   $('#wWord').innerHTML = '<b>' + esc(it.word[0]) + '</b>' + esc(it.word.slice(1));
-  $('#wGroup').hidden = !it.group; $('#wGroup').textContent = it.group;
+  const glabel = wcat === 'mix' && it.cat !== 'pron' ? CAT_LABEL[it.cat] : it.group;
+  $('#wGroup').hidden = !glabel; $('#wGroup').textContent = glabel;
   $('#wEx').hidden = !it.ex;
   if (it.ex) {
     const re = new RegExp('\\b(' + it.word.replace(/ /g, '\\s') + ')\\b', 'i');
@@ -1031,9 +1041,16 @@ $('#wSlow').addEventListener('click', () => { replay($('#wEmo'), 'say'); sayWord
 $('#wEx').addEventListener('click', () => { const it = wlist()[wi]; tell([EN(it.ex, { rate: 0.6 }), PAUSE(250), RU(it.exRu)], [EN(it.ex, { rate: 0.6 })]); });
 $('#wPrev').addEventListener('click', () => showWord(wi - 1, true, -1));
 $('#wNext').addEventListener('click', () => showWord(wi + 1, true, 1));
-document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
-  wcat = c.dataset.cat; store.set('wcat', wcat);
-  document.querySelectorAll('.chip').forEach(x => x.setAttribute('aria-pressed', String(x === c)));
+function markChips() {
+  document.querySelectorAll('.chip[data-cat]').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.cat === wcat)));
+  $('#wMix').setAttribute('aria-pressed', String(wcat === 'mix'));
+}
+$('#wMix').addEventListener('click', () => {
+  wcat = 'mix'; store.set('wcat', wcat); reshuffle(); markChips();
+  replay($('#wMix'), 'right'); showWord(0, true, 1);
+});
+document.querySelectorAll('.chip[data-cat]').forEach(c => c.addEventListener('click', () => {
+  wcat = c.dataset.cat; store.set('wcat', wcat); markChips();
   showWord(0, true, 1);
 }));
 let wtx = null;
@@ -1043,7 +1060,7 @@ $('#wcard').addEventListener('touchend', e => {
   if (Math.abs(dx) > 60) showWord(wi + (dx < 0 ? 1 : -1), true, dx < 0 ? 1 : -1);
 });
 
-document.querySelectorAll('.chip').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.cat === wcat)));
+markChips();
 
 /* speech speed (parents) */
 function applySpeed() { document.querySelectorAll('[data-speed]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.speed === speed))); }
