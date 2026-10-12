@@ -135,11 +135,17 @@ main{flex:1;min-height:0;display:flex;flex-direction:column}
 .meadow svg{position:absolute;left:0;bottom:100%;width:100%;height:26px;display:block}
 
 /* Word cards */
-#words{align-items:center;gap:10px;padding-bottom:4px}
+#words{align-items:center;gap:10px;padding-bottom:4px;overflow-x:clip}
 .chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
-.chip{border:0;border-radius:999px;padding:10px 16px;font-weight:900;font-size:16px;background:var(--card);color:var(--ink);box-shadow:0 3px 0 rgba(38,48,67,.12)}
+.chip{border:0;border-radius:999px;padding:9px 13px;font-weight:900;font-size:15px;background:var(--card);color:var(--ink);box-shadow:0 3px 0 rgba(38,48,67,.12)}
 .chip[aria-pressed="true"]{background:var(--ink);color:var(--on-color)}
-.wcard{flex:1;min-height:0;width:100%;max-width:480px;background:var(--card);border-radius:34px;box-shadow:0 8px 0 rgba(38,48,67,.12);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:14px 16px;text-align:center;overflow:hidden}
+.wcard{flex:1;min-height:0;width:100%;max-width:480px;background:var(--card);border-radius:34px;box-shadow:0 8px 0 rgba(38,48,67,.12);display:flex;flex-direction:column;align-items:center;gap:2px;padding:14px 16px;text-align:center;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.wcard>.sp{flex:1 1 0;min-height:0}
+.wgroup{font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--c);background:#F1F4F9;border-radius:999px;padding:4px 12px}
+.wex{margin-top:10px;border:0;border-radius:18px;background:#F1F4F9;padding:10px 16px;display:flex;flex-direction:column;gap:2px;max-width:100%}
+.wex-en{font-family:var(--font-letter);font-weight:600;font-size:22px;color:var(--ink);line-height:1.2}
+.wex-en b{color:var(--c)}
+.wex-ru{font-weight:800;font-size:15px;color:var(--ink-soft)}
 .wcard.flip{animation:cardin .35s ease-out}
 .wemo{border:0;background:none;padding:0;font-size:clamp(90px,28vmin,170px);line-height:1.12}
 .wemo.say{animation:wiggle .6s}
@@ -209,13 +215,13 @@ main{flex:1;min-height:0;display:flex;flex-direction:column}
       </div>
       <div class="modes">
         <button class="toy mode" style="--c:var(--orange)" data-go="abc"><span class="ico">🔤</span><span class="lbl">Алфавит</span><span class="en">ABC</span></button>
-        <button class="toy mode" style="--c:var(--pink)" data-go="words"><span class="ico">📖</span><span class="lbl">Слова</span><span class="en">Words</span></button>
+        <button class="toy mode" style="--c:var(--pink)" data-go="words"><span class="ico">📖</span><span class="lbl">Слова</span><span class="en">372 карточки</span></button>
         <button class="toy mode" style="--c:var(--purple)" data-go="find"><span class="ico">🔎</span><span class="lbl">Найди букву</span><span class="en">Find the letter</span></button>
         <button class="toy mode" style="--c:var(--green)" data-go="pick"><span class="ico">🦒</span><span class="lbl">Кто на букву?</span><span class="en">Who starts with…</span></button>
         <button class="toy mode wide" style="--c:var(--blue)" data-go="bubbles"><span class="ico">🫧</span><span class="txt"><span class="lbl">Пузырьки</span><span class="en">Pop the letters</span></span></button>
       </div>
       <div class="parents">
-        <div><b>Для родителей.</b> Включите звук: на iPhone боковой переключатель «Без звука» должен быть выключен. Задания и похвала звучат по-русски, а буквы и слова — по-английски, с переводом. В разделе «Слова» есть транскрипция, чтобы вам было проще повторять вместе с малышом. За правильные ответы малыш получает звёздочки, ошибки не наказываются.</div>
+        <div><b>Для родителей.</b> Включите звук: на iPhone боковой переключатель «Без звука» должен быть выключен. Задания и похвала звучат по-русски, а буквы и слова — по-английски, с переводом. В разделе «Слова» — по 100 самых частых в детской речи существительных, глаголов и прилагательных и все местоимения с примерами. Транскрипция поможет повторять вместе с малышом; θ и ð — межзубные звуки (кончик языка между зубами, θ глухой, ð звонкий). За правильные ответы малыш получает звёздочки, ошибки не наказываются.</div>
         <div class="seg-row"><span>Скорость речи</span>
           <div class="seg" role="group" aria-label="Скорость речи">
             <button data-speed="slower" aria-pressed="false">Очень медленно</button>
@@ -244,19 +250,24 @@ main{flex:1;min-height:0;display:flex;flex-direction:column}
 
     <section class="scene" id="words" hidden>
       <div class="chips" role="group" aria-label="Какие слова показывать">
-        <button class="chip" data-cat="all" aria-pressed="true">Все</button>
-        <button class="chip" data-cat="animal" aria-pressed="false">🐾 Животные</button>
-        <button class="chip" data-cat="plant" aria-pressed="false">🌱 Растения</button>
+        <button class="chip" data-cat="noun" aria-pressed="true">Существительные</button>
+        <button class="chip" data-cat="verb" aria-pressed="false">Глаголы</button>
+        <button class="chip" data-cat="adj" aria-pressed="false">Прилагательные</button>
+        <button class="chip" data-cat="pron" aria-pressed="false">Местоимения</button>
       </div>
       <div class="wcard" id="wcard">
+        <i class="sp" aria-hidden="true"></i>
+        <div class="wgroup" id="wGroup" hidden></div>
         <button class="wemo" id="wEmo" aria-label="Послушать слово">🐻</button>
         <div class="wword" id="wWord">Bear</div>
         <div class="wsyl" id="wSyl" hidden></div>
         <div class="wtr" id="wTr"><small>читается</small><span id="wTrTxt">[бэр]</span></div>
         <div class="wipa" id="wIpa">/ber/</div>
         <div class="wru ru" id="wRu">медведь</div>
+        <button class="wex" id="wEx" hidden aria-label="Послушать пример"><span class="wex-en" id="wExEn"></span><span class="wex-ru ru" id="wExRu"></span></button>
+        <i class="sp" aria-hidden="true"></i>
       </div>
-      <div class="counter" id="wCount">1 / 51</div>
+      <div class="counter" id="wCount">1 / 100</div>
       <div class="wbtns">
         <button class="toy arrow" style="--c:var(--blue)" id="wPrev" aria-label="Предыдущее слово"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
         <button class="toy sbtn" id="wSay"><span class="si" aria-hidden="true">🔊</span>Слушать</button>
@@ -372,6 +383,404 @@ LET.forEach(l => l.items.forEach((it, k) => {
   it.color = l.color;
 }));
 
+/* Словарь карточек «Слова».
+   Существительные, глаголы, прилагательные: по 100 самых частых слов в речи с малышами
+   (по спискам первых слов MacArthur-Bates CDI и частотности детской речи; порядок примерный).
+   Формат: слоги (через ·)|перевод|картинка|транскрипция русскими буквами|IPA (американский вариант)
+   Местоимения: те же поля + |группа|пример|перевод примера */
+const VOCAB_RAW = {
+noun: `mom|мама|👩|мам|mɑːm
+dad|папа|👨|дэд|dæd
+ba·by|малыш|👶|бэ́йби|ˈbeɪ.bi
+dog|собака|🐶|дог|dɑːɡ
+cat|кошка|🐱|кэт|kæt
+ball|мяч|⚽|бол|bɑːl
+book|книга|📖|бук|bʊk
+car|машина|🚗|кар|kɑːr
+milk|молоко|🥛|милк|mɪlk
+wa·ter|вода|💧|уо́тэр|ˈwɑː.t̬ɚ
+ap·ple|яблоко|🍎|э́пл|ˈæp.əl
+ba·na·na|банан|🍌|бэнэ́нэ|bəˈnæn.ə
+cook·ie|печенье|🍪|ку́ки|ˈkʊk.i
+juice|сок|🧃|джус|dʒuːs
+bird|птица|🐦|бёрд|bɝːd
+fish|рыба|🐟|фиш|fɪʃ
+duck|утка|🦆|дак|dʌk
+cow|корова|🐄|кау|kaʊ
+horse|лошадь|🐴|хорс|hɔːrs
+pig|свинка|🐷|пиг|pɪɡ
+sheep|овечка|🐑|шип|ʃiːp
+bear|медведь|🐻|бэр|ber
+bun·ny|зайка|🐰|ба́ни|ˈbʌn.i
+mouse|мышка|🐭|маус|maʊs
+frog|лягушка|🐸|фрог|frɑːɡ
+bee|пчела|🐝|би|biː
+but·ter·fly|бабочка|🦋|ба́тэрфлай|ˈbʌt̬.ɚ.flaɪ
+chick·en|курица|🐔|чи́кин|ˈtʃɪk.ɪn
+li·on|лев|🦁|ла́йэн|ˈlaɪ.ən
+mon·key|обезьянка|🐵|ма́нки|ˈmʌŋ.ki
+el·e·phant|слон|🐘|э́лэфэнт|ˈel.ə.fənt
+ti·ger|тигр|🐯|та́йгер|ˈtaɪ.ɡɚ
+shoe|ботинок|👟|шу|ʃuː
+sock|носок|🧦|сок|sɑːk
+hat|шапка|👒|хэт|hæt
+coat|пальто|🧥|коут|koʊt
+shirt|рубашка|👕|шёрт|ʃɝːt
+eye|глаз|👁️|ай|aɪ
+nose|нос|👃|ноуз|noʊz
+mouth|рот|👄|мауθ|maʊθ
+ear|ухо|👂|ир|ɪr
+hand|рука (кисть)|✋|хэнд|hænd
+foot|нога (ступня)|🦶|фут|fʊt
+tooth|зуб|🦷|туθ|tuːθ
+hair|волосы|💇|хэр|her
+bed|кровать|🛏️|бэд|bed
+chair|стул|🪑|чэр|tʃer
+cup|чашка|☕|кап|kʌp
+spoon|ложка|🥄|спун|spuːn
+bath|ванна|🛁|бэθ|bæθ
+door|дверь|🚪|дор|dɔːr
+win·dow|окно|🪟|уи́ндоу|ˈwɪn.doʊ
+house|дом|🏠|хаус|haʊs
+tree|дерево|🌳|три|triː
+flow·er|цветок|🌸|фла́уэр|ˈflaʊ.ɚ
+sun|солнце|☀️|сан|sʌn
+moon|луна|🌙|мун|muːn
+star|звезда|⭐|стар|stɑːr
+sky|небо|🌤️|скай|skaɪ
+cloud|облако|☁️|клауд|klaʊd
+rain|дождь|🌧️|рэйн|reɪn
+snow|снег|❄️|сноу|snoʊ
+bus|автобус|🚌|бас|bʌs
+train|поезд|🚂|трэйн|treɪn
+plane|самолёт|✈️|плэйн|pleɪn
+boat|лодка|⛵|боут|boʊt
+truck|грузовик|🚚|трак|trʌk
+bike|велосипед|🚲|байк|baɪk
+toy|игрушка|🧸|той|tɔɪ
+bal·loon|воздушный шарик|🎈|бэлу́н|bəˈluːn
+cake|торт|🎂|кэйк|keɪk
+egg|яйцо|🥚|эг|eɡ
+bread|хлеб|🍞|брэд|bred
+cheese|сыр|🧀|чиз|tʃiːz
+car·rot|морковка|🥕|кэ́рэт|ˈker.ət
+or·ange|апельсин|🍊|о́риндж|ˈɔːr.ɪndʒ
+grapes|виноград|🍇|грэйпс|ɡreɪps
+straw·ber·ry|клубника|🍓|стро́бэри|ˈstrɑː.ber.i
+ice cream|мороженое|🍦|а́йс крим|ˈaɪs ˌkriːm
+piz·za|пицца|🍕|пи́тсэ|ˈpiːt.sə
+phone|телефон|📱|фоун|foʊn
+clock|часы|🕰️|клок|klɑːk
+key|ключ|🔑|ки|kiː
+bag|сумка|👜|бэг|bæɡ
+box|коробка|📦|бокс|bɑːks
+drum|барабан|🥁|драм|drʌm
+pen·cil|карандаш|✏️|пэ́нсл|ˈpen.səl
+bot·tle|бутылочка|🍼|ба́тл|ˈbɑː.t̬əl
+light|свет, лампа|💡|лайт|laɪt
+boy|мальчик|👦|бой|bɔɪ
+girl|девочка|👧|гёрл|ɡɝːl
+grand·ma|бабушка|👵|грэ́нма|ˈɡræn.mɑː
+grand·pa|дедушка|👴|грэ́нпа|ˈɡræn.pɑː
+friend|друг|🧑‍🤝‍🧑|фрэнд|frend
+park|парк|🏞️|парк|pɑːrk
+beach|пляж|🏖️|бич|biːtʃ
+fire|огонь|🔥|файр|faɪr
+heart|сердце|❤️|харт|hɑːrt
+gift|подарок|🎁|гифт|ɡɪft
+bell|колокольчик|🔔|бэл|bel`,
+
+verb: `eat|есть, кушать|🍴|ит|iːt
+drink|пить|🥤|дринк|drɪŋk
+sleep|спать|😴|слип|sliːp
+go|идти, ехать|🚶|гоу|ɡoʊ
+come|приходить|🫴|кам|kʌm
+look|смотреть|👀|лук|lʊk
+see|видеть|👁️|си|siː
+play|играть|🎲|плэй|pleɪ
+run|бегать|🏃|ран|rʌn
+walk|гулять, ходить|👣|уок|wɑːk
+jump|прыгать|🦘|джамп|dʒʌmp
+sit|сидеть|🪑|сит|sɪt
+stand|стоять|🧍|стэнд|stænd
+give|давать|🎁|гив|ɡɪv
+take|брать|🤲|тэйк|teɪk
+want|хотеть|🙏|уонт|wɑːnt
+help|помогать|🙋|хэлп|help
+o·pen|открывать|📂|о́упэн|ˈoʊ.pən
+close|закрывать|🚪|клоуз|kloʊz
+wash|мыть|🧼|уош|wɑːʃ
+kiss|целовать|😘|кис|kɪs
+hug|обнимать|🤗|хаг|hʌɡ
+love|любить|💕|лав|lʌv
+like|нравиться|👍|лайк|laɪk
+read|читать|📚|рид|riːd
+sing|петь|🎤|синг|sɪŋ
+dance|танцевать|💃|дэнс|dæns
+draw|рисовать|🖍️|дро|drɑː
+swim|плавать|🏊|суим|swɪm
+fly|летать|🪽|флай|flaɪ
+climb|лазать|🧗|клайм|klaɪm
+throw|бросать|⚾|θроу|θroʊ
+catch|ловить|🧤|кэч|kætʃ
+kick|пинать|⚽|кик|kɪk
+push|толкать|👐|пуш|pʊʃ
+pull|тянуть|🪢|пул|pʊl
+ride|кататься|🚴|райд|raɪd
+cry|плакать|😢|край|kraɪ
+laugh|смеяться|😂|лэф|læf
+smile|улыбаться|😊|смайл|smaɪl
+talk|разговаривать|💬|ток|tɑːk
+say|сказать|🗨️|сэй|seɪ
+lis·ten|слушать|👂|ли́сн|ˈlɪs.ən
+hear|слышать|🎧|хир|hɪr
+make|делать|🛠️|мэйк|meɪk
+build|строить|🧱|билд|bɪld
+cook|готовить|🍳|кук|kʊk
+bake|печь|🥧|бэйк|beɪk
+clean|убирать|🧹|клин|kliːn
+brush|чистить щёткой|🪥|браш|brʌʃ
+wake|просыпаться|⏰|уэйк|weɪk
+bring|приносить|🛍️|бринг|brɪŋ
+put|класть|📥|пут|pʊt
+find|находить|🔍|файнд|faɪnd
+hide|прятаться|🫣|хайд|haɪd
+know|знать|💡|ноу|noʊ
+think|думать|🤔|θинк|θɪŋk
+feel|чувствовать|🫶|фил|fiːl
+touch|трогать|👆|тач|tʌtʃ
+hold|держать|🫳|хоулд|hoʊld
+car·ry|нести|🧺|кэ́ри|ˈker.i
+drop|ронять|⬇️|дроп|drɑːp
+fall|падать|🍂|фол|fɑːl
+stop|остановиться|✋|стоп|stɑːp
+wait|ждать|⏳|уэйт|weɪt
+get|получать|📬|гэт|ɡet
+wear|носить (одежду)|👗|уэр|wer
+buy|покупать|🛒|бай|baɪ
+tell|рассказывать|🗣️|тэл|tel
+ask|спрашивать|❓|эск|æsk
+count|считать|🔢|каунт|kaʊnt
+write|писать|✍️|райт|raɪt
+cut|резать|✂️|кат|kʌt
+paint|рисовать красками|🎨|пэйнт|peɪnt
+blow|дуть|🌬️|блоу|bloʊ
+bite|кусать|😬|байт|baɪt
+shake|трясти|🫨|шэйк|ʃeɪk
+turn|поворачивать|🔄|тёрн|tɝːn
+spin|кружиться|🌀|спин|spɪn
+roll|катить|🎳|роул|roʊl
+knock|стучать|👊|нок|nɑːk
+call|звонить, звать|📞|кол|kɑːl
+show|показывать|🖼️|шоу|ʃoʊ
+try|пробовать|🎯|трай|traɪ
+share|делиться|🤝|шэр|ʃer
+lie|лежать|🛌|лай|laɪ
+dream|видеть сны|💭|дрим|driːm
+grow|расти|🌱|гроу|ɡroʊ
+win|побеждать|🏆|уин|wɪn
+pick|собирать, срывать|🍒|пик|pɪk
+fix|чинить|🔧|фикс|fɪks
+pour|наливать|🫗|пор|pɔːr
+feed|кормить|🍼|фид|fiːd
+pet|гладить (животное)|🐕|пэт|pet
+tick·le|щекотать|🪶|тикл|ˈtɪk.əl
+whis·per|шептать|🤫|уи́спэр|ˈwɪs.pɚ
+shout|кричать|📢|шаут|ʃaʊt
+clap|хлопать|👏|клэп|klæp
+wave|махать|👋|уэйв|weɪv
+point|показывать пальцем|👉|пойнт|pɔɪnt`,
+
+adj: `big|большой|🐘|биг|bɪɡ
+lit·tle|маленький|🐭|литл|ˈlɪt̬.əl
+small|небольшой|🐁|смол|smɑːl
+ti·ny|крошечный|🐜|та́йни|ˈtaɪ.ni
+huge|огромный|🦕|хьюдж|hjuːdʒ
+hot|горячий|🔥|хот|hɑːt
+cold|холодный|🥶|коулд|koʊld
+warm|тёплый|🧣|уорм|wɔːrm
+cool|прохладный|😎|кул|kuːl
+wet|мокрый|💦|уэт|wet
+dry|сухой|🏜️|драй|draɪ
+clean|чистый|🧽|клин|kliːn
+dir·ty|грязный|🐽|дё́рти|ˈdɝː.t̬i
+hap·py|счастливый|😀|хэ́пи|ˈhæp.i
+sad|грустный|😞|сэд|sæd
+an·gry|сердитый|😠|э́нгри|ˈæŋ.ɡri
+scared|испуганный|😨|скэрд|skerd
+tired|уставший|🥱|тайрд|taɪrd
+sleep·y|сонный|😪|сли́пи|ˈsliː.pi
+hun·gry|голодный|🍽️|ха́нгри|ˈhʌŋ.ɡri
+thirst·y|хочет пить|🚰|θё́рсти|ˈθɝː.sti
+good|хороший|😇|гуд|ɡʊd
+bad|плохой|👎|бэд|bæd
+nice|приятный|🥰|найс|naɪs
+pret·ty|хорошенький|🌷|при́ти|ˈprɪt̬.i
+beau·ti·ful|красивый|🌈|бью́тифул|ˈbjuː.t̬ə.fəl
+cute|милый|🐣|кьют|kjuːt
+fun·ny|смешной|🤡|фа́ни|ˈfʌn.i
+sil·ly|дурашливый|🤪|си́ли|ˈsɪl.i
+yum·my|вкусный|😋|я́ми|ˈjʌm.i
+yuck·y|невкусный, фу|🤢|я́ки|ˈjʌk.i
+sweet|сладкий|🍬|суит|swiːt
+sour|кислый|🍋|са́уэр|saʊr
+salt·y|солёный|🧂|со́лти|ˈsɑːl.ti
+spic·y|острый|🌶️|спа́йси|ˈspaɪ.si
+juic·y|сочный|🍉|джу́си|ˈdʒuː.si
+crunch·y|хрустящий|🥨|кра́нчи|ˈkrʌn.tʃi
+fresh|свежий|🥬|фрэш|freʃ
+soft|мягкий|🧸|софт|sɑːft
+hard|твёрдый|🪨|хард|hɑːrd
+fast|быстрый|🐆|фэст|fæst
+slow|медленный|🐢|слоу|sloʊ
+loud|громкий|🔊|лауд|laʊd
+qui·et|тихий|🔇|ква́йэт|ˈkwaɪ.ət
+nois·y|шумный|🥁|но́йзи|ˈnɔɪ.zi
+new|новый|🆕|ну|nuː
+old|старый|🏚️|оулд|oʊld
+long|длинный|🐍|лонг|lɔːŋ
+short|короткий|🩳|шорт|ʃɔːrt
+tall|высокий (ростом)|🦒|тол|tɑːl
+high|высокий (высоко)|🏔️|хай|haɪ
+low|низкий|🔽|лоу|loʊ
+deep|глубокий|🌊|дип|diːp
+full|полный|🍱|фул|fʊl
+emp·ty|пустой|🫙|э́мпти|ˈemp.ti
+heav·y|тяжёлый|🏋️|хэ́ви|ˈhev.i
+light|лёгкий|🪶|лайт|laɪt
+o·pen|открытый|🔓|о́упэн|ˈoʊ.pən
+closed|закрытый|🔒|клоузд|kloʊzd
+red|красный|🔴|рэд|red
+blue|синий|🔵|блу|bluː
+green|зелёный|🟢|грин|ɡriːn
+yel·low|жёлтый|🟡|йэ́лоу|ˈjel.oʊ
+or·ange|оранжевый|🟠|о́риндж|ˈɔːr.ɪndʒ
+pur·ple|фиолетовый|🟣|пё́рпл|ˈpɝː.pəl
+pink|розовый|🩷|пинк|pɪŋk
+black|чёрный|⚫|блэк|blæk
+white|белый|⚪|уайт|waɪt
+brown|коричневый|🟤|браун|braʊn
+gray|серый|🩶|грэй|ɡreɪ
+dark|тёмный|🌑|дарк|dɑːrk
+bright|яркий|🔆|брайт|braɪt
+round|круглый|⭕|раунд|raʊnd
+scar·y|страшный|👻|скэ́ри|ˈsker.i
+fluff·y|пушистый|🐩|фла́фи|ˈflʌf.i
+smooth|гладкий|🫧|смуð|smuːð
+spik·y|колючий|🦔|спа́йки|ˈspaɪ.ki
+stick·y|липкий|🍯|сти́ки|ˈstɪk.i
+shin·y|блестящий|✨|ша́йни|ˈʃaɪ.ni
+mess·y|неаккуратный|🌪️|мэ́си|ˈmes.i
+strong|сильный|💪|стронг|strɑːŋ
+weak|слабый|🪫|уик|wiːk
+sick|больной|🤒|сик|sɪk
+brave|смелый|🦸|брэйв|breɪv
+kind|добрый|💗|кайнд|kaɪnd
+gen·tle|нежный|🕊️|джэ́нтл|ˈdʒen.t̬əl
+shy|стеснительный|🙈|шай|ʃaɪ
+bro·ken|сломанный|💔|бро́укэн|ˈbroʊ.kən
+ex·cit·ed|в восторге|🤩|икса́йтид|ɪkˈsaɪ.t̬ɪd
+sur·prised|удивлённый|😲|сэпра́йзд|sɚˈpraɪzd
+bus·y|занятой|📅|би́зи|ˈbɪz.i
+read·y|готовый|🏁|рэ́ди|ˈred.i
+care·ful|осторожный|⚠️|кэ́рфул|ˈker.fəl
+naugh·ty|непослушный|😈|но́ти|ˈnɑː.t̬i
+wild|дикий|🐺|уайлд|waɪld
+sun·ny|солнечный|☀️|са́ни|ˈsʌn.i
+rain·y|дождливый|☔|рэ́йни|ˈreɪ.ni
+snow·y|снежный|⛄|сно́уи|ˈsnoʊ.i
+wind·y|ветреный|🍃|уи́нди|ˈwɪn.di
+fa·vor·ite|любимый|⭐|фэ́йвэрит|ˈfeɪ.vɚ.ɪt`,
+
+pron: `I|я|🙋|ай|aɪ|subj|I am big!|Я большой!
+you|ты, вы|👉|ю|juː|subj|You are my friend.|Ты мой друг.
+he|он|👦|хи|hiː|subj|He is a boy.|Он мальчик.
+she|она|👧|ши|ʃiː|subj|She is a girl.|Она девочка.
+it|оно, это (о предмете, животном)|🐶|ит|ɪt|subj|It is a dog.|Это собака.
+we|мы|👨‍👩‍👧|уи|wiː|subj|We play.|Мы играем.
+they|они|👫|ðэй|ðeɪ|subj|They run.|Они бегут.
+me|меня, мне|🙋‍♀️|ми|miː|obj|Hug me!|Обними меня!
+you|тебя, тебе, вас|👉|ю|juː|obj|I love you.|Я тебя люблю.
+him|его, ему|👦|хим|hɪm|obj|Look at him.|Посмотри на него.
+her|её, ей|👧|хёр|hɝː|obj|Help her.|Помоги ей.
+it|его, её, это (о предмете)|🧸|ит|ɪt|obj|Take it.|Возьми это.
+us|нас, нам|👨‍👩‍👦|ас|ʌs|obj|Play with us!|Поиграй с нами!
+them|их, им|👭|ðэм|ðem|obj|Look at them.|Посмотри на них.
+my|мой, моя, моё|🙋|май|maɪ|pdet|my ball|мой мяч
+your|твой, ваш|👉|ёр|jɔːr|pdet|your hat|твоя шапка
+his|его (у него)|👦|хиз|hɪz|pdet|his car|его машина
+her|её (у неё)|👧|хёр|hɝː|pdet|her book|её книга
+its|его, её (у животного, предмета)|🐱|итс|ɪts|pdet|its tail|его хвост
+our|наш|🏠|а́уэр|aʊr|pdet|our house|наш дом
+their|их|🚌|ðэр|ðer|pdet|their bus|их автобус
+mine|мой (моё)|🙋|майн|maɪn|ppron|It is mine!|Это моё!
+yours|твой, ваш|👉|ёрз|jɔːrz|ppron|This is yours.|Это твоё.
+his|его|👦|хиз|hɪz|ppron|The car is his.|Машина его.
+hers|её|👧|хёрз|hɝːz|ppron|The book is hers.|Книга её.
+ours|наш|🏡|а́уэрз|aʊrz|ppron|The house is ours.|Дом наш.
+theirs|их|👫|ðэрз|ðerz|ppron|The bus is theirs.|Автобус их.
+my·self|я сам, себя|🪞|майсэ́лф|maɪˈself|refl|I can do it myself!|Я могу сам!
+your·self|ты сам, себя|👉|ёрсэ́лф|jɔːrˈself|refl|Look at yourself.|Посмотри на себя.
+him·self|он сам, себя|👦|химсэ́лф|hɪmˈself|refl|He dresses himself.|Он одевается сам.
+her·self|она сама, себя|👧|хёрсэ́лф|hɚˈself|refl|She washes herself.|Она умывается сама.
+it·self|само, себя|🐱|итсэ́лф|ɪtˈself|refl|The cat washes itself.|Кошка умывается.
+our·selves|мы сами, себя|👨‍👩‍👧|ауэрсэ́лвз|aʊrˈselvz|refl|We did it ourselves!|Мы сделали это сами!
+your·selves|вы сами, себя|👥|ёрсэ́лвз|jɔːrˈselvz|refl|Help yourselves!|Угощайтесь!
+them·selves|они сами, себя|👫|ðэмсэ́лвз|ðəmˈselvz|refl|They play by themselves.|Они играют сами.
+this|этот, это|👇|ðис|ðɪs|dem|This is a cat.|Это кошка.
+that|тот, то|👉|ðэт|ðæt|dem|That is a dog.|Вон там собака.
+these|эти|👇|ðиз|ðiːz|dem|These are apples.|Это яблоки.
+those|те|👉|ðоуз|ðoʊz|dem|Those are birds.|Вон там птицы.
+who|кто|❓|ху|huː|q|Who is it?|Кто это?
+whom|кого, кому|❓|хум|huːm|q|To whom?|Кому?
+whose|чей|❓|хуз|huːz|q|Whose ball is it?|Чей это мяч?
+what|что|❓|уот|wʌt|q|What is it?|Что это?
+which|который, какой|❓|уич|wɪtʃ|q|Which one?|Какой из них?
+some·one|кто-то|🧑|са́муан|ˈsʌm.wʌn|indef|Someone is here.|Кто-то здесь.
+some·bod·y|кто-то|🧑|са́мбади|ˈsʌm.bɑː.di|indef|Somebody is at the door.|Кто-то у двери.
+some·thing|что-то|🎁|са́мθинг|ˈsʌm.θɪŋ|indef|I see something!|Я что-то вижу!
+an·y·one|кто-нибудь|🙋|э́ниуан|ˈen.i.wʌn|indef|Is anyone home?|Кто-нибудь дома?
+an·y·bod·y|кто-нибудь|🙋|э́нибади|ˈen.i.bɑː.di|indef|Can anybody help?|Кто-нибудь поможет?
+an·y·thing|что-нибудь|❔|э́ниθинг|ˈen.i.θɪŋ|indef|Do you want anything?|Хочешь что-нибудь?
+some|немного, некоторые|🍪|сам|sʌm|indef|I want some.|Хочу немножко.
+an·y|какой-нибудь, сколько-нибудь|🔍|э́ни|ˈen.i|indef|Do you have any?|У тебя есть?
+man·y|много (штук)|🔢|мэ́ни|ˈmen.i|indef|Many stars!|Много звёзд!
+much|много (чего-то)|🥛|мач|mʌtʃ|indef|Not much.|Немного.
+few|немногие, несколько|🤏|фью|fjuː|indef|A few apples.|Несколько яблок.
+one|один (вот этот)|☝️|уан|wʌn|indef|I want this one.|Хочу вот этот.
+oth·er|другой|🔁|а́ðэр|ˈʌð.ɚ|indef|The other one.|Другой.
+an·oth·er|ещё один|➕|эна́ðэр|əˈnʌð.ɚ|indef|Another one!|Ещё один!
+ev·ery·one|все (люди)|👨‍👩‍👧‍👦|э́вриуан|ˈev.ri.wʌn|univ|Everyone is happy!|Все рады!
+ev·ery·bod·y|все (люди)|👨‍👩‍👧‍👦|э́врибади|ˈev.ri.bɑː.di|univ|Everybody, clap!|Все хлопаем!
+ev·ery·thing|всё|🌍|э́вриθинг|ˈev.ri.θɪŋ|univ|I love everything!|Мне всё нравится!
+all|все, всё|💯|ол|ɑːl|univ|All the toys.|Все игрушки.
+each|каждый|🍬|ич|iːtʃ|univ|One for each.|Каждому по одной.
+both|оба|✌️|боуθ|boʊθ|univ|I want both!|Хочу оба!
+ei·ther|любой из двух|🤷|и́ðэр|ˈiː.ðɚ|univ|Take either.|Возьми любой из двух.
+no one|никто|🫥|но́у уан|ˈnoʊ wʌn|neg|No one is here.|Здесь никого нет.
+no·bod·y|никто|🫥|но́убади|ˈnoʊ.bɑː.di|neg|Nobody is sleeping.|Никто не спит.
+noth·ing|ничего|🫙|на́θинг|ˈnʌθ.ɪŋ|neg|Nothing is in the box.|В коробке ничего нет.
+none|ни один, нисколько|🚫|нан|nʌn|neg|None left.|Ничего не осталось.
+nei·ther|ни один из двух|🙅|ни́ðэр|ˈniː.ðɚ|neg|Neither is mine.|Ни один не мой.
+each oth·er|друг друга|🤝|ич а́ðэр|iːtʃ ˈʌð.ɚ|recip|They hug each other.|Они обнимают друг друга.
+one an·oth·er|друг друга|🫂|уан эна́ðэр|wʌn əˈnʌð.ɚ|recip|Help one another.|Помогайте друг другу.`
+};
+const PRON_GROUPS = {
+  subj: 'личное: кто?', obj: 'личное: кого? кому?', pdet: 'притяжательное: чей? (+ предмет)',
+  ppron: 'притяжательное: чей? (без предмета)', refl: 'возвратное: сам, себя', dem: 'указательное',
+  q: 'вопросительное', indef: 'неопределённое', univ: 'обобщающее', neg: 'отрицательное', recip: 'взаимное'
+};
+
+const VOCAB = {};
+Object.keys(VOCAB_RAW).forEach(cat => {
+  VOCAB[cat] = VOCAB_RAW[cat].trim().split('\n').map((line, i) => {
+    const p = line.split('|'); const word = p[0].replace(/·/g, '');
+    return { cat, syl: p[0], word, say: word, ru: p[1], emo: p[2], tr: '[' + p[3] + ']', ipa: '/' + p[4] + '/',
+      group: p[5] ? PRON_GROUPS[p[5]] : '', ex: p[6] || '', exRu: p[7] || '',
+      color: 'var(' + COLORS[i % COLORS.length] + ')' };
+  });
+});
+
 const $ = s => document.querySelector(s);
 const rand = a => a[Math.floor(Math.random() * a.length)];
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
@@ -450,8 +859,9 @@ const PRAISE = ['Молодец!', 'Умница!', 'Правильно!', 'От
 const TRY = ['Попробуй ещё!', 'Давай ещё разок!', 'Ищи дальше!'];
 /* Слово: бодро, пауза, ещё раз медленнее, перевод. «Elephant! … Elephant. — слон» */
 function sayWord(it) {
-  tell([EN(it.say + '!', { pitch: 1.28 }), PAUSE(450), EN(it.say, { rate: 0.52, pitch: 1.12 }), PAUSE(300), RU(it.ru)],
-       [EN(it.say + '!', { pitch: 1.28 }), PAUSE(450), EN(it.say, { rate: 0.52, pitch: 1.12 })]);
+  const ex = it.ex ? [PAUSE(550), EN(it.ex, { rate: 0.6, pitch: 1.18 })] : [];
+  tell([EN(it.say + '!', { pitch: 1.28 }), PAUSE(450), EN(it.say, { rate: 0.52, pitch: 1.12 }), PAUSE(300), RU(it.ru), ...ex, ...(it.ex ? [PAUSE(250), RU(it.exRu)] : [])],
+       [EN(it.say + '!', { pitch: 1.28 }), PAUSE(450), EN(it.say, { rate: 0.52, pitch: 1.12 }), ...ex]);
 }
 /* Совсем медленно, два раза, чтобы можно было повторить за голосом */
 function sayWordSlow(it) {
@@ -587,15 +997,22 @@ $('#card').addEventListener('touchend', e => {
 });
 
 /* word cards */
-let wcat = 'all', wi = 0;
-const wlist = () => wcat === 'all' ? PICS : PICS.filter(p => p.cat === wcat);
+let wcat = store.get('wcat', 'noun'); if (!VOCAB[wcat]) wcat = 'noun';
+let wi = 0;
+const wlist = () => VOCAB[wcat];
+const esc = t => t.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
 function showWord(i, talk, dir) {
   const list = wlist(); wi = (i + list.length) % list.length; const it = list[wi];
   const card = $('#wcard'); card.style.setProperty('--c', it.color);
   $('#wEmo').textContent = it.emo;
-  /* выделяем первую букву (у Fox и Ox — букву x в конце) */
-  const at = it.starts ? 0 : it.word.toUpperCase().lastIndexOf(it.letter);
-  $('#wWord').innerHTML = it.word.slice(0, at) + '<b>' + it.word[at] + '</b>' + it.word.slice(at + 1);
+  $('#wWord').innerHTML = '<b>' + esc(it.word[0]) + '</b>' + esc(it.word.slice(1));
+  $('#wGroup').hidden = !it.group; $('#wGroup').textContent = it.group;
+  $('#wEx').hidden = !it.ex;
+  if (it.ex) {
+    const re = new RegExp('\\b(' + it.word.replace(/ /g, '\\s') + ')\\b', 'i');
+    $('#wExEn').innerHTML = esc(it.ex).replace(re, '<b>$1</b>');
+    $('#wExRu').textContent = it.exRu;
+  }
   const parts = it.syl.split('·');
   $('#wSyl').hidden = parts.length < 2;
   $('#wSyl').innerHTML = parts.join('<i>·</i>');
@@ -611,10 +1028,11 @@ $('#wEmo').addEventListener('click', () => { replay($('#wEmo'), 'say'); sayWord(
 $('#wWord').addEventListener('click', () => sayWord(wlist()[wi]));
 $('#wSay').addEventListener('click', () => { replay($('#wEmo'), 'say'); sayWord(wlist()[wi]); });
 $('#wSlow').addEventListener('click', () => { replay($('#wEmo'), 'say'); sayWordSlow(wlist()[wi]); });
+$('#wEx').addEventListener('click', () => { const it = wlist()[wi]; tell([EN(it.ex, { rate: 0.6 }), PAUSE(250), RU(it.exRu)], [EN(it.ex, { rate: 0.6 })]); });
 $('#wPrev').addEventListener('click', () => showWord(wi - 1, true, -1));
 $('#wNext').addEventListener('click', () => showWord(wi + 1, true, 1));
 document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
-  wcat = c.dataset.cat;
+  wcat = c.dataset.cat; store.set('wcat', wcat);
   document.querySelectorAll('.chip').forEach(x => x.setAttribute('aria-pressed', String(x === c)));
   showWord(0, true, 1);
 }));
@@ -624,6 +1042,8 @@ $('#wcard').addEventListener('touchend', e => {
   if (wtx == null) return; const dx = e.changedTouches[0].clientX - wtx; wtx = null;
   if (Math.abs(dx) > 60) showWord(wi + (dx < 0 ? 1 : -1), true, dx < 0 ? 1 : -1);
 });
+
+document.querySelectorAll('.chip').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.cat === wcat)));
 
 /* speech speed (parents) */
 function applySpeed() { document.querySelectorAll('[data-speed]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.speed === speed))); }
