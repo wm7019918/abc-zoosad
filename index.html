@@ -780,7 +780,7 @@ const VOCAB = {};
 Object.keys(VOCAB_RAW).forEach(cat => {
   VOCAB[cat] = VOCAB_RAW[cat].trim().split('\n').map((line, i) => {
     const p = line.split('|'); const word = p[0].replace(/·/g, '');
-    return { cat, syl: p[0], word, say: word, ru: p[1], emo: p[2], tr: '[' + p[3] + ']', ipa: '/' + p[4] + '/',
+    return { key: cat + i, cat, syl: p[0], word, say: word, ru: p[1], emo: p[2], tr: '[' + p[3] + ']', ipa: '/' + p[4] + '/',
       group: p[5] ? PRON_GROUPS[p[5]] : '', ex: p[6] || '', exRu: p[7] || '',
       color: 'var(' + COLORS[i % COLORS.length] + ')' };
   });
@@ -933,7 +933,7 @@ function go(name) {
   const home = name === 'home';
   $('#back').hidden = home; $('#brand').hidden = !home; $('#sceneTitle').hidden = home;
   $('#sceneTitle').textContent = TITLES[name] || '';
-  if (name === 'words') showWord(wi, true, 0);
+  if (name === 'words') showWord(savedPos(), true, 0);
   if (name === 'find') newFind();
   if (name === 'pick') newPick();
   if (name === 'bubbles') startBubbles();
@@ -1005,13 +1005,26 @@ $('#card').addEventListener('touchend', e => {
 let wcat = store.get('wcat', 'noun'); if (!VOCAB[wcat] && wcat !== 'mix') wcat = 'noun';
 /* «Вперемешку»: все карточки всех вкладок в случайном порядке; новый порядок при каждом нажатии */
 const CAT_LABEL = { noun: 'существительное', verb: 'глагол', adj: 'прилагательное' };
+/* Где остановились: номер карточки для каждой вкладки и порядок «Вперемешку» хранятся на телефоне,
+   поэтому после перезапуска раздел открывается на той же карточке и в той же колоде. */
+const ALL_WORDS = Object.values(VOCAB).flat();
+const BY_KEY = Object.fromEntries(ALL_WORDS.map(w => [w.key, w]));
+let wpos = store.get('wpos', {}); if (!wpos || typeof wpos !== 'object') wpos = {};
 let mixList = null;
-const reshuffle = () => { mixList = shuffle(Object.values(VOCAB).flat()); };
+(function restoreMix() {
+  const keys = store.get('wmix', null);
+  if (!Array.isArray(keys) || keys.length !== ALL_WORDS.length) return;
+  const list = keys.map(k => BY_KEY[k]);
+  if (list.every(Boolean) && new Set(keys).size === keys.length) mixList = list;
+})();
+const reshuffle = () => { mixList = shuffle(ALL_WORDS); store.set('wmix', mixList.map(w => w.key)); };
 let wi = 0;
+const savedPos = () => { const n = +wpos[wcat]; return Number.isInteger(n) && n >= 0 ? n : 0; };
 const wlist = () => { if (wcat !== 'mix') return VOCAB[wcat]; if (!mixList) reshuffle(); return mixList; };
 const esc = t => t.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
 function showWord(i, talk, dir) {
-  const list = wlist(); wi = (i + list.length) % list.length; const it = list[wi];
+  const list = wlist(); wi = ((i % list.length) + list.length) % list.length; const it = list[wi];
+  wpos[wcat] = wi; store.set('wpos', wpos);
   const card = $('#wcard'); card.style.setProperty('--c', it.color);
   $('#wEmo').textContent = it.emo;
   $('#wWord').innerHTML = '<b>' + esc(it.word[0]) + '</b>' + esc(it.word.slice(1));
@@ -1047,11 +1060,11 @@ function markChips() {
 }
 $('#wMix').addEventListener('click', () => {
   wcat = 'mix'; store.set('wcat', wcat); reshuffle(); markChips();
-  replay($('#wMix'), 'right'); showWord(0, true, 1);
+  replay($('#wMix'), 'right'); showWord(0, true, 1);  /* новая колода — с первой карточки */
 });
 document.querySelectorAll('.chip[data-cat]').forEach(c => c.addEventListener('click', () => {
   wcat = c.dataset.cat; store.set('wcat', wcat); markChips();
-  showWord(0, true, 1);
+  showWord(savedPos(), true, 1);
 }));
 let wtx = null;
 $('#wcard').addEventListener('touchstart', e => { wtx = e.touches[0].clientX; }, { passive: true });
